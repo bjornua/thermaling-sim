@@ -1,27 +1,41 @@
-# React + TypeScript + Vite
+# Thermal Centering Simulations
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+## Introduction
 
-Currently, two official plugins are available:
+Welcome to the Thermal Centering Simulations! These simulations aims to showcase various strategies for centering in thermals by relying solely on a variometer, which measures your vertical speed in real-time.
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react/README.md) uses [Babel](https://babeljs.io/) for Fast Refresh
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react-swc) uses [SWC](https://swc.rs/) for Fast Refresh
+## What you are seeing
 
-## Expanding the ESLint configuration
+- **Not Banking**: In this context, "not banking" means maintaining a 40-degree bank angle, which serves as the default or neutral state.
+- **Banking**: When the glider decides to bank, it will switch to a 60-degree bank angle, representing a more aggressive turn into the thermal.
 
-If you are developing a production application, we recommend updating the configuration to enable type aware lint rules:
+In the simulations, dots represent gliders circling within thermals. The objective is to understand how different banking decisions affect the glider's ability to stay within the thermal's core and gain altitude.
 
-- Configure the top-level `parserOptions` property like this:
+## View Online
 
-```js
-   parserOptions: {
-    ecmaVersion: 'latest',
-    sourceType: 'module',
-    project: ['./tsconfig.json', './tsconfig.node.json'],
-    tsconfigRootDir: __dirname,
-   },
-```
+The simulations can be accessed and interacted with via the following link: [https://thermal-sim.netlify.app/](https://thermal-sim.netlify.app/)
 
-- Replace `plugin:@typescript-eslint/recommended` to `plugin:@typescript-eslint/recommended-type-checked` or `plugin:@typescript-eslint/strict-type-checked`
-- Optionally add `plugin:@typescript-eslint/stylistic-type-checked`
-- Install [eslint-plugin-react](https://github.com/jsx-eslint/eslint-plugin-react) and add `plugin:react/recommended` & `plugin:react/jsx-runtime` to the `extends` list
+## Running the Project Locally
+
+For those interested in running the simulation on their local machine, please follow the steps below:
+
+### Pre-requisites
+
+- Node.js and npm installed
+- Clone the project repository
+
+### Setup and Running
+
+1. **Navigate to the Project Folder**: Open a terminal and navigate to the root folder where you've cloned the project.
+2. **Install Dependencies**: Run the command `npm install` to install all the required dependencies listed in `package.json`.
+3. **Start the Development Server**: Run `npm run dev` to start the Vite development server.
+4. **Build for Production**: To create a production-ready build, execute `npm run build`.
+5. **Code Linting**: To check the code for any linting issues, run `npm run lint`.
+6. **Preview Build**: To preview the production build locally, execute `npm run preview`.
+
+### Package Scripts Overview
+
+- `dev`: Starts the Vite development server
+- `build`: Compiles TypeScript files and builds the project for production using Vite
+- `lint`: Executes ESLint for code quality checks
+- `preview`: Runs the Vite preview command to preview the production build
