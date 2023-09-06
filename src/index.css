@@ -1,0 +1,18 @@
+html,
+body {
+  max-width: 40em;
+  margin: 0 auto;
+}
+
+canvas {
+  border: 1px solid black;
+}
+
+.simulations {
+  display: flex;
+  flex-direction: column;
+}
+
+.simulation {
+  margin-bottom: 2em;
+}

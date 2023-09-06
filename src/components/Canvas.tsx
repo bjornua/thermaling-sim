@@ -11,12 +11,18 @@ export const Canvas = ({ world }: CanvasProps) => {
 
   useEffect(() => {
     const ctx = canvasRef.current?.getContext("2d");
+    let prevTimeStamp: number | null = null;
 
     function loop() {
       if (!ctx) return;
 
-      ctx.clearRect(0, 0, 600, 600);
-      world.update();
+      ctx.clearRect(0, 0, world.width, world.height);
+
+      const nextTimeStamp = Date.now();
+      world.update(
+        prevTimeStamp === null ? 0 : (nextTimeStamp - prevTimeStamp) / 1000
+      );
+      prevTimeStamp = nextTimeStamp;
       world.draw(ctx);
       requestAnimationFrame(loop);
     }
@@ -24,5 +30,15 @@ export const Canvas = ({ world }: CanvasProps) => {
     loop();
   }, [world]);
 
-  return <canvas ref={canvasRef} width="600" height="600"></canvas>;
+  return (
+    <div className="simulation">
+      <h3>{world.glider.controller.title()}</h3>
+      <p>{world.glider.controller.description()}</p>
+      <canvas
+        ref={canvasRef}
+        width={`${world.scaleToPixel(world.width)}px`}
+        height={`${world.scaleToPixel(world.height)}px`}
+      ></canvas>
+    </div>
+  );
 };

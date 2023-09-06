@@ -1,39 +1,47 @@
-import "./App.css";
 import { Glider } from "./models/Glider";
-import {
-  bankWhenLiftIsIncreasing,
-  bankWhenLiftIsDecreasing,
-} from "./utils/bankingStrategies";
 import { Canvas } from "./components/Canvas";
-import { ThermalInfo } from "./components/ThermalInfo";
 import { World } from "./models/World";
 import { Thermal } from "./models/Thermal";
-import { GliderController } from "./models/GliderController";
+import {
+  BankWhenLiftIsDecreasing,
+  BankWhenLiftIsDecreasingDelay,
+  BankWhenLiftIsIncreasing,
+  AlwaysBanking,
+  NeverBanking,
+} from "./models/GliderController";
 
 export default function App() {
-  const thermal = new Thermal(300, 300, 5, 300);
+  const thermal = new Thermal(300, 300, 5, 250);
+
   const gliders = [
-    new Glider(
-      300,
-      200,
-      "#00f",
-      new GliderController(bankWhenLiftIsIncreasing)
-    ),
-    new Glider(
-      250,
-      150,
-      "#0f0",
-      new GliderController(bankWhenLiftIsDecreasing)
-    ),
+    new NeverBanking(),
+    new AlwaysBanking(),
+    new BankWhenLiftIsIncreasing(),
+    new BankWhenLiftIsDecreasing(),
+    new BankWhenLiftIsDecreasingDelay(),
   ];
 
-  const world = new World(600, 600, thermal, gliders);
+  const worlds = gliders.map(function (glider) {
+    return (
+      <Canvas
+        world={
+          new World(600, 600, thermal, new Glider(150, 150, "#00F", glider))
+        }
+      />
+    );
+  });
 
   return (
     <div>
       <h1>Thermal Centering Simulation</h1>
-      <ThermalInfo world={world} />
-      <Canvas world={world} />
+      <p>
+        Simulating different techniques for centering in thermals, by only using
+        variometer, meaning the current vertical speed. The dots represent
+        gliders circling in a thermals. The gliders can decide between
+        "notbanking" (which in this case means banking 40 degrees), and banking
+        60° degrees.
+      </p>
+      <div className="simulations">{worlds}</div>
     </div>
   );
 }
