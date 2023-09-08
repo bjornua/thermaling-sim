@@ -12,11 +12,11 @@ export default function App() {
         </div>
         <div>
           <p>
-            This simple simulation is designed to explore various strategies for
-            centering in thermals, relying solely on output of the variometer
-            for real-time vertical speed measurements. It's worth noting that in
-            real-world applications, glider pilots may also sense changes in
-            lift through change in acceleration.
+            This overhead simulation is designed to explore various strategies
+            for centering in thermals, relying solely on output of the
+            variometer for real-time vertical speed measurements. It's worth
+            noting that in real-world applications, glider pilots may also sense
+            changes in lift through change in acceleration.
           </p>
           <p>
             In the simulation, the dot represents a glider maneuvering within a

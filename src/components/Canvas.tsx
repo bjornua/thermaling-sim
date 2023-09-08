@@ -5,11 +5,11 @@ import { useState } from "react";
 import { Container, Slider, Text } from "@mantine/core";
 import { Thermal } from "../models/Thermal";
 import {
-  BankOnDecreasingLiftDelay,
   AlwaysBanking,
   NeverBanking,
   BankOnIncreasingLift,
   BankOnDecreasingLift,
+  AdaptiveBanking,
 } from "../models/GliderController";
 import { Glider } from "../models/Glider";
 import { Flex, Select } from "@mantine/core";
@@ -24,28 +24,25 @@ export const Canvas = () => {
     () => [
       new NeverBanking(35),
       new AlwaysBanking(45),
-      new BankOnIncreasingLift(60, 40),
-      new BankOnDecreasingLift(60, 40),
-      new BankOnDecreasingLiftDelay(45, 65),
+      new BankOnIncreasingLift(40, 60),
+      new BankOnDecreasingLift(40, 60),
+      new AdaptiveBanking(0, 45, 60),
     ],
     []
   );
 
-  const controller = controllers[activeControllerIndex];
-  const world = useMemo(
-    function () {
-      const thermal = new Thermal(300, 300, 5, 250);
+  const world = useMemo(function () {
+    const thermal = new Thermal(300, 300, 5, 250);
 
-      return new World(
-        600,
-        600,
-        thermal,
-        new Glider(150, 150, "#00F", controller)
-      );
-    },
-    [controller]
-  );
+    return new World(
+      600,
+      600,
+      thermal,
+      new Glider(150, 150, "#00F", new NeverBanking(35))
+    );
+  }, []);
 
+  world.glider.controller = controllers[activeControllerIndex];
   world.timeAcceleration = speed;
 
   useEffect(() => {
@@ -85,7 +82,7 @@ export const Canvas = () => {
           label={(value) => `${value.toFixed(1)}x`}
           step={1}
           value={speed}
-          mb={"xl"}
+          mb="xl"
           onChange={(s) => {
             setSpeed(s);
           }}
@@ -98,8 +95,8 @@ export const Canvas = () => {
         />
 
         <Select
-          label="Simulation"
-          placeholder="Pick Simulation"
+          label="Pilot"
+          placeholder="Pick Pilot"
           allowDeselect={false}
           data={controllers.map((c, i) => ({
             value: String(i),

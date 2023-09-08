@@ -11,7 +11,7 @@ export class World {
     public thermal: Thermal,
     public glider: Glider
   ) {
-    this.scaleFactor = 0.5; // Initialize with a suitable value; say 1 meter per pixel
+    this.scaleFactor = 0.6; // Initialize with a suitable value; say 1 meter per pixel
     this.timeAcceleration = 1;
   }
 

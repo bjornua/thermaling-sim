@@ -24,6 +24,7 @@ export class Thermal {
       const lift = (i / 5) * this.maxLift;
       const radius = this.calculateDistanceToCenterFromLift(lift) * scaleFactor;
       ctx.strokeStyle = "#f00";
+      ctx.lineWidth = 1;
       ctx.beginPath();
       ctx.arc(
         this.x * scaleFactor,

@@ -17,7 +17,7 @@ export class BankOnIncreasingLift implements GliderController {
     const liftChangeRate = (lift - this.previousLift) / elapsedTime;
     this.previousLift = lift;
 
-    return liftChangeRate > 0 ? this.turningBank : this.neutralBank;
+    return liftChangeRate > 0.025 ? this.turningBank : this.neutralBank;
   }
 
   title(): string {
@@ -45,7 +45,7 @@ export class BankOnDecreasingLift implements GliderController {
     const liftChangeRate = (lift - this.previousLift) / elapsedTime;
     this.previousLift = lift;
 
-    return liftChangeRate < 0 ? this.turningBank : this.neutralBank;
+    return liftChangeRate < -0.025 ? this.turningBank : this.neutralBank;
   }
 
   title(): string {
@@ -58,78 +58,6 @@ export class BankOnDecreasingLift implements GliderController {
 
   stateText(): string {
     return "decreasing";
-  }
-}
-
-type BankDelayState =
-  | { type: "neutral" }
-  | { type: "turning" }
-  | { type: "holding"; elapsed: number };
-
-export class BankOnDecreasingLiftDelay implements GliderController {
-  private previousLift: number = 0;
-  private state: BankDelayState = { type: "neutral" };
-
-  constructor(public neutralBank: number, public turningBank: number) {}
-
-  updateState(lift: number, elapsedTime: number): BankDelayState {
-    const liftChangeRage = (lift - this.previousLift) / elapsedTime;
-    const liftIsDecreasing = liftChangeRage < 0;
-    this.previousLift = lift;
-
-    if (this.state.type === "holding") {
-      if (this.state.elapsed <= 2) {
-        return {
-          type: "holding",
-          elapsed: this.state.elapsed + elapsedTime,
-        };
-      }
-
-      return { type: "neutral" };
-    }
-    if (this.state.type === "turning") {
-      if (liftIsDecreasing) {
-        return this.state;
-      }
-      return { type: "holding", elapsed: 0 };
-    }
-    if (this.state.type === "neutral") {
-      if (liftIsDecreasing) {
-        return { type: "turning" };
-      }
-      return this.state;
-    }
-
-    return this.state;
-  }
-
-  update(lift: number, elapsedTime: number): number {
-    const newState = this.updateState(lift, elapsedTime);
-    if (this.state.type !== newState.type) {
-      console.log(newState.type);
-    }
-    this.state = newState;
-
-    return this.state.type !== "neutral" ? this.turningBank : this.neutralBank;
-  }
-
-  title() {
-    return `Delayed Hold: ${this.neutralBank}° to ${this.turningBank}° (Lift Gain)`;
-  }
-
-  description() {
-    return "Turn tight when the vario shows a drop in lift, but when it starts going up again, hold the turn for a couple more seconds to hug the thermal's core.";
-  }
-
-  stateText() {
-    switch (this.state.type) {
-      case "turning":
-        return "turning";
-      case "neutral":
-        return "neutral";
-      case "holding":
-        return `holding(${this.state.elapsed.toFixed(2)}s)`;
-    }
   }
 }
 
@@ -171,5 +99,44 @@ export class NeverBanking implements GliderController {
 
   stateText(): string {
     return "notbanking";
+  }
+}
+
+export class AdaptiveBanking implements GliderController {
+  public previousLift = 0;
+
+  constructor(
+    public tightTurnBank: number,
+    public neutralBank: number,
+    public wideTurnBank: number
+  ) {}
+
+  update(lift: number, elapsedTime: number): number {
+    if (elapsedTime === 0) {
+      return this.neutralBank;
+    }
+
+    const liftChangeRate = (lift - this.previousLift) / elapsedTime;
+    this.previousLift = lift;
+
+    if (liftChangeRate > 0.05) {
+      return this.tightTurnBank;
+    } else if (liftChangeRate < -0.05) {
+      return this.wideTurnBank;
+    } else {
+      return this.neutralBank;
+    }
+  }
+
+  title(): string {
+    return `Adaptive Banking: ${this.tightTurnBank}° tight, ${this.neutralBank}° neutral, ${this.wideTurnBank}° wide`;
+  }
+
+  description(): string {
+    return `This strategy employs an adaptive banking angle depending on the rate of change in lift. Tight turns are executed when lift increases rapidly, wide turns when it decreases, and neutral banking otherwise.`;
+  }
+
+  stateText(): string {
+    return "adaptive";
   }
 }
