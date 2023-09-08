@@ -1,7 +1,5 @@
 # Thermal Centering Simulations
 
-## Introduction
-
 Welcome to the Thermal Centering Simulations! These simulations aims to showcase various strategies for centering in thermals by relying solely on a variometer, which measures your vertical speed in real-time.
 
 ## What you are seeing

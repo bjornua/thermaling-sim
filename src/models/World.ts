@@ -3,7 +3,7 @@ import { Thermal } from "./Thermal";
 
 export class World {
   private scaleFactor: number; // Meters per pixel
-  private timeAcceleration: number;
+  public timeAcceleration: number;
 
   constructor(
     public width: number,
@@ -11,7 +11,7 @@ export class World {
     public thermal: Thermal,
     public glider: Glider
   ) {
-    this.scaleFactor = 1; // Initialize with a suitable value; say 1 meter per pixel
+    this.scaleFactor = 0.5; // Initialize with a suitable value; say 1 meter per pixel
     this.timeAcceleration = 1;
   }
 

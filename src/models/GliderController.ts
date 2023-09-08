@@ -50,6 +50,7 @@ export class BankWhenLiftIsDecreasingDelay implements GliderController {
           elapsed: this.state.elapsed + elapsedTime,
         };
       }
+
       return { type: "notbanking" };
     }
     if (this.state.type === "banking") {
@@ -69,7 +70,11 @@ export class BankWhenLiftIsDecreasingDelay implements GliderController {
   }
 
   decideIsBanking(lift: number, elapsedTime: number): boolean {
-    this.state = this.updateState(lift, elapsedTime);
+    const newState = this.updateState(lift, elapsedTime);
+    if (this.state.type !== newState.type) {
+      console.log(newState.type);
+    }
+    this.state = newState;
 
     return this.state.type !== "notbanking";
   }

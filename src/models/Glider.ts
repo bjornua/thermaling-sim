@@ -53,27 +53,23 @@ export class Glider {
 
     // Draw the bank angle
     ctx.fillStyle = "#000";
-    ctx.font = `${12 * scaleFactor}px Arial`;
+    ctx.font = `${12}px Arial`;
     ctx.fillText(
       `State: ${this.controller.stateText()}`,
-      pixelX + 15 * scaleFactor,
-      pixelY - 5 * scaleFactor
+      pixelX + 15,
+      pixelY - 5
     );
 
     // Draw the lift value
     // Assuming `this.lift` exists and is updated by the `update()` method
-    ctx.fillText(
-      `Lift: ${this.lift.toFixed(2)} m/s`,
-      pixelX + 15 * scaleFactor,
-      pixelY + 10 * scaleFactor
-    );
+    ctx.fillText(`Lift: ${this.lift.toFixed(2)} m/s`, pixelX + 15, pixelY + 10);
 
     // Draw the lift value
     // Assuming `this.lift` exists and is updated by the `update()` method
     ctx.fillText(
       `Height: ${this.height.toFixed(0)}m`,
-      pixelX + 15 * scaleFactor,
-      pixelY + 25 * scaleFactor
+      pixelX + 15,
+      pixelY + 25
     );
   }
 }
