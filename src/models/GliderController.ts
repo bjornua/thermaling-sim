@@ -1,42 +1,76 @@
 export interface GliderController {
-  decideIsBanking(lift: number, elapsedTime: number): boolean;
+  update(lift: number, elapsedTime: number): number;
   title(): string;
   description(): string;
   stateText(): string;
 }
 
-export class BankWhenLiftIsIncreasing implements GliderController {
+export class BankOnIncreasingLift implements GliderController {
   public previousLift = 0;
-  public isBanking = false;
 
-  decideIsBanking(lift: number): boolean {
-    const liftChange = lift - this.previousLift;
+  constructor(public neutralBank: number, public turningBank: number) {}
+
+  update(lift: number, elapsedTime: number): number {
+    if (elapsedTime === 0) {
+      return this.neutralBank;
+    }
+    const liftChangeRate = (lift - this.previousLift) / elapsedTime;
     this.previousLift = lift;
-    this.isBanking = liftChange > 0;
-    return this.isBanking;
+
+    return liftChangeRate > 0 ? this.turningBank : this.neutralBank;
   }
 
-  title() {
-    return "Bank on Lift Gain";
+  title(): string {
+    return `Turn ${this.turningBank}° when lift is increasing, ${this.neutralBank}° otherwise`;
   }
 
-  description() {
-    return "Bank when you feel lift? That's one way to leave a thermal — fast!";
+  description(): string {
+    return this.title();
   }
 
   stateText(): string {
-    return this.isBanking ? "banking" : "notbanking";
+    return "increasing";
+  }
+}
+
+export class BankOnDecreasingLift implements GliderController {
+  public previousLift = 0;
+
+  constructor(public neutralBank: number, public turningBank: number) {}
+
+  update(lift: number, elapsedTime: number): number {
+    if (elapsedTime === 0) {
+      return this.neutralBank;
+    }
+    const liftChangeRate = (lift - this.previousLift) / elapsedTime;
+    this.previousLift = lift;
+
+    return liftChangeRate < 0 ? this.turningBank : this.neutralBank;
+  }
+
+  title(): string {
+    return `Turn ${this.turningBank}° when lift is decreasing, ${this.neutralBank}° otherwise`;
+  }
+
+  description(): string {
+    return this.title();
+  }
+
+  stateText(): string {
+    return "decreasing";
   }
 }
 
 type BankDelayState =
-  | { type: "banking" }
-  | { type: "notbanking" }
+  | { type: "neutral" }
+  | { type: "turning" }
   | { type: "holding"; elapsed: number };
 
-export class BankWhenLiftIsDecreasingDelay implements GliderController {
+export class BankOnDecreasingLiftDelay implements GliderController {
   private previousLift: number = 0;
-  private state: BankDelayState = { type: "notbanking" };
+  private state: BankDelayState = { type: "neutral" };
+
+  constructor(public neutralBank: number, public turningBank: number) {}
 
   updateState(lift: number, elapsedTime: number): BankDelayState {
     const liftChangeRage = (lift - this.previousLift) / elapsedTime;
@@ -51,17 +85,17 @@ export class BankWhenLiftIsDecreasingDelay implements GliderController {
         };
       }
 
-      return { type: "notbanking" };
+      return { type: "neutral" };
     }
-    if (this.state.type === "banking") {
+    if (this.state.type === "turning") {
       if (liftIsDecreasing) {
         return this.state;
       }
       return { type: "holding", elapsed: 0 };
     }
-    if (this.state.type === "notbanking") {
+    if (this.state.type === "neutral") {
       if (liftIsDecreasing) {
-        return { type: "banking" };
+        return { type: "turning" };
       }
       return this.state;
     }
@@ -69,18 +103,18 @@ export class BankWhenLiftIsDecreasingDelay implements GliderController {
     return this.state;
   }
 
-  decideIsBanking(lift: number, elapsedTime: number): boolean {
+  update(lift: number, elapsedTime: number): number {
     const newState = this.updateState(lift, elapsedTime);
     if (this.state.type !== newState.type) {
       console.log(newState.type);
     }
     this.state = newState;
 
-    return this.state.type !== "notbanking";
+    return this.state.type !== "neutral" ? this.turningBank : this.neutralBank;
   }
 
   title() {
-    return `Hold Bank on Lift Gain`;
+    return `Delayed Hold: ${this.neutralBank}° to ${this.turningBank}° (Lift Gain)`;
   }
 
   description() {
@@ -89,51 +123,29 @@ export class BankWhenLiftIsDecreasingDelay implements GliderController {
 
   stateText() {
     switch (this.state.type) {
-      case "banking":
-        return "banking";
-      case "notbanking":
-        return "notbanking";
+      case "turning":
+        return "turning";
+      case "neutral":
+        return "neutral";
       case "holding":
         return `holding(${this.state.elapsed.toFixed(2)}s)`;
     }
   }
 }
 
-export class BankWhenLiftIsDecreasing implements GliderController {
-  public previousLift = 0;
-  public isBanking = false;
-
-  decideIsBanking(lift: number): boolean {
-    const liftChange = lift - this.previousLift;
-    this.previousLift = lift;
-    this.isBanking = liftChange < 0;
-    return this.isBanking;
-  }
-
-  title() {
-    return "Bank on Lift Loss";
-  }
-
-  description() {
-    return "Turn as soon as you feel/hear the lift dropping. You're basically chasing the core of the thermal.";
-  }
-
-  stateText(): string {
-    return "notbanking";
-  }
-}
-
 export class AlwaysBanking implements GliderController {
-  decideIsBanking(): boolean {
-    return true;
+  constructor(public turningBank: number) {}
+
+  update(): number {
+    return this.turningBank;
   }
 
   title() {
-    return "Full Tilt";
+    return `Constant Bank: ${this.turningBank}°`;
   }
 
   description() {
-    return "Who cares about the vario? Keep a steady 60° bank and hope you're in the thermal!";
+    return `Who cares about the vario? Keep a steady ${this.turningBank}° bank and hope you're in the thermal!`;
   }
 
   stateText(): string {
@@ -142,17 +154,19 @@ export class AlwaysBanking implements GliderController {
 }
 
 export class NeverBanking implements GliderController {
+  constructor(public neutralBank: number) {}
+
   title(): string {
-    return "No Banking (Only 40°)";
+    return `Constant Bank: ${this.neutralBank}°`;
   }
   public previousLift = 0;
 
-  decideIsBanking(): boolean {
-    return false;
+  update(): number {
+    return this.neutralBank;
   }
 
   description() {
-    return "Ignore the vario and maintain a 40° bank. You're not trying to center, just cruising along.";
+    return `Ignore the vario and maintain a ${this.neutralBank}° bank. You're not trying to center, just cruising along.`;
   }
 
   stateText(): string {

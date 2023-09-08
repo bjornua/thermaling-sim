@@ -22,9 +22,7 @@ export class Glider {
 
   update(lift: number, elapsedTime: number): void {
     this.height += elapsedTime * lift;
-    this.bankAngle = this.controller.decideIsBanking(lift, elapsedTime)
-      ? 60
-      : 40;
+    this.bankAngle = this.controller.update(lift, elapsedTime);
     this.lift = lift;
     this.updatePosition(elapsedTime);
   }
@@ -53,23 +51,19 @@ export class Glider {
 
     // Draw the bank angle
     ctx.fillStyle = "#000";
-    ctx.font = `${12}px Arial`;
-    ctx.fillText(
-      `State: ${this.controller.stateText()}`,
-      pixelX + 15,
-      pixelY - 5
-    );
+    ctx.font = `12px Arial`;
+    ctx.fillText(`Bank: ${this.bankAngle}°`, pixelX + 15, pixelY - 6);
 
     // Draw the lift value
     // Assuming `this.lift` exists and is updated by the `update()` method
-    ctx.fillText(`Lift: ${this.lift.toFixed(2)} m/s`, pixelX + 15, pixelY + 10);
+    ctx.fillText(`Lift: ${this.lift.toFixed(2)} m/s`, pixelX + 15, pixelY + 6);
 
     // Draw the lift value
     // Assuming `this.lift` exists and is updated by the `update()` method
     ctx.fillText(
       `Height: ${this.height.toFixed(0)}m`,
       pixelX + 15,
-      pixelY + 25
+      pixelY + 18
     );
   }
 }

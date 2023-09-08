@@ -2,33 +2,31 @@ import { useRef, useEffect, useMemo } from "react";
 
 import { World } from "../models/World";
 import { useState } from "react";
-import { Slider, Text } from "@mantine/core";
+import { Container, Slider, Text } from "@mantine/core";
 import { Thermal } from "../models/Thermal";
 import {
-  BankWhenLiftIsDecreasing,
-  BankWhenLiftIsDecreasingDelay,
-  BankWhenLiftIsIncreasing,
+  BankOnDecreasingLiftDelay,
   AlwaysBanking,
   NeverBanking,
+  BankOnIncreasingLift,
+  BankOnDecreasingLift,
 } from "../models/GliderController";
 import { Glider } from "../models/Glider";
 import { Flex, Select } from "@mantine/core";
-
-let loops = 0;
 
 export const Canvas = () => {
   const canvasRef = useRef<HTMLCanvasElement>(null);
 
   const [activeControllerIndex, setActiveControllerIndex] = useState(0);
-  const [speed, setSpeed] = useState(1);
+  const [speed, setSpeed] = useState(2);
 
   const controllers = useMemo(
     () => [
-      new NeverBanking(),
-      new AlwaysBanking(),
-      new BankWhenLiftIsIncreasing(),
-      new BankWhenLiftIsDecreasing(),
-      new BankWhenLiftIsDecreasingDelay(),
+      new NeverBanking(35),
+      new AlwaysBanking(45),
+      new BankOnIncreasingLift(60, 40),
+      new BankOnDecreasingLift(60, 40),
+      new BankOnDecreasingLiftDelay(45, 65),
     ],
     []
   );
@@ -78,7 +76,27 @@ export const Canvas = () => {
 
   return (
     <Flex align="flex-start">
-      <div>
+      <Container fluid style={{ flexGrow: 1 }}>
+        <Text size="sm">Simulation Speed</Text>
+        <Slider
+          defaultValue={1}
+          min={0}
+          max={10}
+          label={(value) => `${value.toFixed(1)}x`}
+          step={1}
+          value={speed}
+          mb={"xl"}
+          onChange={(s) => {
+            setSpeed(s);
+          }}
+          marks={[
+            { value: 1, label: "1.0x" },
+            { value: 2, label: "2.0x" },
+            { value: 5, label: "5.0x" },
+            { value: 10, label: "10.0x" },
+          ]}
+        />
+
         <Select
           label="Simulation"
           placeholder="Pick Simulation"
@@ -96,34 +114,14 @@ export const Canvas = () => {
             setActiveControllerIndex(Number(v));
           }}
         />
-        <>
-          <Text>Simulation Speed</Text>
-          <Slider
-            defaultValue={1}
-            min={0}
-            max={10}
-            label={(value) => `${value.toFixed(1)}x`}
-            step={1}
-            value={speed}
-            onChange={(s) => {
-              setSpeed(s);
-            }}
-            // styles={{ markLabel: { display: "none" } }}
-            marks={[
-              { value: 1, label: "1.0x" },
-              { value: 2, label: "2.0x" },
-              { value: 5, label: "5.0x" },
-              { value: 10, label: "10.0x" },
-            ]}
-          />
-        </>
-        <p>{world.glider.controller.description()}</p>
-      </div>
+        <Text mt="md">{world.glider.controller.description()}</Text>
+      </Container>
       <div>
         <canvas
           ref={canvasRef}
           width={`${world.scaleToPixel(world.width)}px`}
           height={`${world.scaleToPixel(world.height)}px`}
+          style={{ display: "block" }}
         ></canvas>
       </div>
     </Flex>

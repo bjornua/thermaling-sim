@@ -4,8 +4,8 @@ Welcome to the Thermal Centering Simulations! These simulations aims to showcase
 
 ## What you are seeing
 
-- **Not Banking**: In this context, "not banking" means maintaining a 40-degree bank angle, which serves as the default or neutral state.
-- **Banking**: When the glider decides to bank, it will switch to a 60-degree bank angle, representing a more aggressive turn into the thermal.
+- **Not Banking**: In this context, "not banking" means maintaining a 25-degree bank angle, which serves as the default or neutral state.
+- **Banking**: When the glider decides to bank, it will switch to a 45-degree bank angle, representing a more aggressive turn into the thermal.
 
 In the simulations, dots represent gliders circling within thermals. The objective is to understand how different banking decisions affect the glider's ability to stay within the thermal's core and gain altitude.
 
