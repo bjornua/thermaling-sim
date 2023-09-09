@@ -2,15 +2,9 @@ import { useRef, useEffect, useMemo } from "react";
 
 import { World } from "../models/World";
 import { useState } from "react";
-import { Container, Slider, Text } from "@mantine/core";
+import { Container, List, Slider, Text } from "@mantine/core";
 import { Thermal } from "../models/Thermal";
-import {
-  AlwaysBanking,
-  NeverBanking,
-  BankOnIncreasingLift,
-  BankOnDecreasingLift,
-  AdaptiveBanking,
-} from "../models/GliderController";
+import { AdaptiveBanking, GliderController } from "../models/GliderController";
 import { Glider } from "../models/Glider";
 import { Flex, Select } from "@mantine/core";
 
@@ -20,13 +14,12 @@ export const Canvas = () => {
   const [activeControllerIndex, setActiveControllerIndex] = useState(0);
   const [speed, setSpeed] = useState(2);
 
-  const controllers = useMemo(
+  const controllers: [GliderController, string][] = useMemo(
     () => [
-      new NeverBanking(35),
-      new AlwaysBanking(45),
-      new BankOnIncreasingLift(40, 60),
-      new BankOnDecreasingLift(40, 60),
-      new AdaptiveBanking(0, 45, 60),
+      [new AdaptiveBanking(30, 45, 60), "AdaptiveBanking(30, 45, 60)"],
+      [new AdaptiveBanking(0, 0, 0), "AdaptiveBanking(0, 0, 0)"],
+      [new AdaptiveBanking(20, 20, 20), "AdaptiveBanking(20, 20, 20)"],
+      [new AdaptiveBanking(45, 45, 45), "AdaptiveBanking(45, 45, 45)"],
     ],
     []
   );
@@ -36,13 +29,13 @@ export const Canvas = () => {
 
     return new World(
       600,
-      600,
+      800,
       thermal,
-      new Glider(150, 150, "#00F", new NeverBanking(35))
+      new Glider(150, 150, "#00F", new AdaptiveBanking(0, 0, 0))
     );
   }, []);
 
-  world.glider.controller = controllers[activeControllerIndex];
+  world.glider.controller = controllers[activeControllerIndex][0];
   world.timeAcceleration = speed;
 
   useEffect(() => {
@@ -100,7 +93,7 @@ export const Canvas = () => {
           allowDeselect={false}
           data={controllers.map((c, i) => ({
             value: String(i),
-            label: c.title(),
+            label: c[1],
           }))}
           value={String(activeControllerIndex)}
           onChange={(v) => {
@@ -111,7 +104,24 @@ export const Canvas = () => {
             setActiveControllerIndex(Number(v));
           }}
         />
-        <Text mt="md">{world.glider.controller.description()}</Text>
+        <List>
+          {world.glider.controller.rules().map(([isActive, description]) => {
+            if (isActive) {
+              return (
+                <List.Item>
+                  <Text weight="bold">{description}</Text>
+                </List.Item>
+              );
+            }
+            return (
+              <List.Item>
+                <Text weight="normal">{description}</Text>
+              </List.Item>
+            );
+          })}
+        </List>
+
+        <Text mt="md">{world.glider.controller.rules()}</Text>
       </Container>
       <div>
         <canvas
