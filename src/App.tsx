@@ -19,7 +19,7 @@ export default function App() {
           <h2>Level 1: Basic Awareness</h2>
           <p>
             At its most fundamental level, thermal soaring involves recognizing
-            that a thermal exists.
+            that you are in a thermal.
           </p>
           <ThermalingSimulation
             controller={new AdaptiveBanking(0, 0, 0)}
