@@ -11,8 +11,8 @@ export class Glider {
   private readonly G = 9.81; // Acceleration due to gravity in m/s^2
   public lift = 0;
   public height = 500;
-  public bankAngle = 45; // Bank angle in degrees
-  public targetBankAngle = 45; // Target bank angle in degrees
+  public bankAngle = 0; // Bank angle in degrees
+  public targetBankAngle = 0; // Target bank angle in degrees
   public maxBankRate = 10; // Maximum rate of bank angle change in degrees per second
   public trace: { x: number; y: number; bankAngle: number; time: number }[] =
     [];
