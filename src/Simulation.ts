@@ -7,6 +7,7 @@ import { World } from "./models/World";
 
 export class Simulation {
   public totalElapsed: number = 0;
+  public shouldRenderOverheadView: boolean = false;
 
   constructor(
     public world: World,
@@ -32,8 +33,7 @@ export class Simulation {
   draw(
     ctx: CanvasRenderingContext2D,
     canvasWidth: number,
-    canvasHeight: number,
-    shouldRenderOverheadView: boolean
+    canvasHeight: number
   ) {
     ctx.fillStyle = "#ffffff";
     ctx.fillRect(0, 0, canvasWidth, canvasHeight);
@@ -60,7 +60,7 @@ export class Simulation {
       this.world.glider.lift
     );
 
-    if (shouldRenderOverheadView) {
+    if (this.shouldRenderOverheadView) {
       renderOverheadView(
         ctx,
         width * 2 + 10,

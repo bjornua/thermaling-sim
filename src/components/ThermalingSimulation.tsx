@@ -1,4 +1,4 @@
-import { useRef, useEffect } from "react";
+import { useRef, useEffect, useMemo } from "react";
 
 import { World } from "../models/World";
 import { useState } from "react";
@@ -47,9 +47,14 @@ export const ThermalingSimulation = ({
   const [shouldRenderOverheadView, setShouldRenderOverheadView] =
     useState(false);
 
+  const simulation = useMemo(() => {
+    return makeSimulation(x, y, controller, speed, duration);
+  }, [controller, duration, x, y]);
+
+  simulation.shouldRenderOverheadView = shouldRenderOverheadView;
+
   useEffect(() => {
     let stop = false;
-    const simulation = makeSimulation(x, y, controller, speed, duration);
 
     let prevTimeStamp: number = Date.now();
 
@@ -69,12 +74,7 @@ export const ThermalingSimulation = ({
       simulation.update((nextTimeStamp - prevTimeStamp) / 1000);
       prevTimeStamp = nextTimeStamp;
 
-      simulation.draw(
-        ctx,
-        canvasElement.width,
-        canvasElement.height,
-        shouldRenderOverheadView
-      );
+      simulation.draw(ctx, canvasElement.width, canvasElement.height);
       requestAnimationFrame(loop);
     }
     loop();
@@ -101,7 +101,7 @@ export const ThermalingSimulation = ({
       stop = true;
       observer.disconnect();
     };
-  }, [controller, duration, shouldRenderOverheadView, x, y]);
+  }, [simulation]);
 
   return (
     <div>
