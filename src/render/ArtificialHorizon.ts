@@ -17,8 +17,19 @@ export default function render(
   const centerX = x + (width - diameter) / 2 + radius;
   const centerY = y + (height - diameter) / 2 + radius;
 
-  drawDynamicContents(ctx, centerX, centerY, radius - 2, bankAngle);
-  drawBankAngleArrow(ctx, centerX, centerY, radius - 2);
+  drawDynamicContents(
+    ctx,
+    centerX,
+    centerY,
+    radius - 2 * window.devicePixelRatio,
+    bankAngle
+  );
+  drawBankAngleArrow(
+    ctx,
+    centerX,
+    centerY,
+    radius - 2 * window.devicePixelRatio
+  );
   drawOuterCircle(ctx, centerX, centerY, radius);
   drawPlaneSymbol(ctx, centerX, centerY);
 }
@@ -31,8 +42,14 @@ function drawOuterCircle(
 ) {
   ctx.beginPath();
   ctx.strokeStyle = BLACK;
-  ctx.arc(centerX, centerY, radius - 2, 0, 2 * Math.PI);
-  ctx.lineWidth = 2;
+  ctx.arc(
+    centerX,
+    centerY,
+    radius - 2 * window.devicePixelRatio,
+    0,
+    2 * Math.PI
+  );
+  ctx.lineWidth = 2 * window.devicePixelRatio;
   ctx.stroke();
 }
 
@@ -67,7 +84,7 @@ function drawDynamicContents(
   ctx.beginPath();
   ctx.moveTo(-radius, 0);
   ctx.lineTo(radius, 0);
-  ctx.lineWidth = 2;
+  ctx.lineWidth = 2 * window.devicePixelRatio;
   ctx.stroke();
 
   ctx.restore();
@@ -92,8 +109,8 @@ function drawBankMarkers(ctx: CanvasRenderingContext2D, radius: number) {
   for (const angle of [10, 20, 30, 45, 60]) {
     const [length, lineWidth] =
       angle < 30 ? [radius * 0.1, 1] : [radius * 0.2, 2];
-    drawMarker(angle, length, lineWidth);
-    drawMarker(-angle, length, lineWidth);
+    drawMarker(angle, length, lineWidth * window.devicePixelRatio);
+    drawMarker(-angle, length, lineWidth * window.devicePixelRatio);
   }
 }
 
@@ -111,7 +128,7 @@ function drawBankAngleArrow(
   ctx.beginPath();
   ctx.moveTo(centerX, centerY);
   ctx.lineTo(arrowX, arrowY);
-  ctx.lineWidth = 2;
+  ctx.lineWidth = 2 * window.devicePixelRatio;
   ctx.stroke();
 }
 
@@ -122,10 +139,10 @@ function drawPlaneSymbol(
 ) {
   ctx.strokeStyle = BLACK;
   ctx.beginPath();
-  ctx.moveTo(centerX - 10, centerY);
-  ctx.lineTo(centerX + 10, centerY);
-  ctx.moveTo(centerX, centerY - 5);
-  ctx.lineTo(centerX, centerY + 5);
-  ctx.lineWidth = 2;
+  ctx.moveTo(centerX - 10 * window.devicePixelRatio, centerY);
+  ctx.lineTo(centerX + 10 * window.devicePixelRatio, centerY);
+  ctx.moveTo(centerX, centerY - 5 * window.devicePixelRatio);
+  ctx.lineTo(centerX, centerY + 5 * window.devicePixelRatio);
+  ctx.lineWidth = 2 * window.devicePixelRatio;
   ctx.stroke();
 }
