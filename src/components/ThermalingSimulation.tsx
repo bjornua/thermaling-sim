@@ -75,8 +75,12 @@ export const ThermalingSimulation = ({
         }
 
         const nextTimeStamp = Date.now();
+        const elapsedTime = Math.min(
+          (nextTimeStamp - prevTimeStamp) / 1000,
+          0.1
+        );
 
-        simulation.update((nextTimeStamp - prevTimeStamp) / 1000);
+        simulation.update(elapsedTime);
         prevTimeStamp = nextTimeStamp;
 
         if (isInView) {
