@@ -55,6 +55,7 @@ export const ThermalingSimulation = ({
 
   useEffect(() => {
     let stop = false;
+    let isInView = false;
 
     let prevTimeStamp: number = Date.now();
 
@@ -65,16 +66,16 @@ export const ThermalingSimulation = ({
     if (!ctx) return;
 
     function loop() {
-      if (stop) return;
-      if (!ctx) return;
-      if (!canvasElement) return;
+      if (stop || !ctx || !canvasElement) return;
 
       const nextTimeStamp = Date.now();
 
       simulation.update((nextTimeStamp - prevTimeStamp) / 1000);
       prevTimeStamp = nextTimeStamp;
 
-      simulation.draw(ctx, canvasElement.width, canvasElement.height);
+      if (isInView) {
+        simulation.draw(ctx, canvasElement.width, canvasElement.height);
+      }
       requestAnimationFrame(loop);
     }
     loop();
@@ -97,9 +98,19 @@ export const ThermalingSimulation = ({
     });
     observer.observe(canvasElement);
 
+    // Create a new intersection observer
+    const interSectionObserver = new IntersectionObserver((entries) => {
+      entries.forEach((entry) => {
+        isInView = entry.isIntersecting;
+      });
+    });
+
+    interSectionObserver.observe(canvasElement);
+
     return () => {
       stop = true;
       observer.disconnect();
+      interSectionObserver.disconnect();
     };
   }, [simulation]);
 
