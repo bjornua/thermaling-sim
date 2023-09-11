@@ -80,7 +80,7 @@ export default function App() {
           </p>
           <ThermalingSimulation
             controller={new AdaptiveBanking(45, 45, 60)}
-            duration={60}
+            duration={80}
             x={0}
             y={150}
           />
@@ -101,7 +101,7 @@ export default function App() {
           </p>
           <ThermalingSimulation
             controller={new AdaptiveBanking(30, 45, 60)}
-            duration={60}
+            duration={80}
             x={0}
             y={150}
           />

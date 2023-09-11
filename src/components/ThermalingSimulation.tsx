@@ -81,10 +81,17 @@ export const ThermalingSimulation = ({
 
     const observer = new ResizeObserver((elements) => {
       for (const element of elements) {
-        canvasElement.width = element.contentRect.width;
-        canvasElement.height = Math.floor(
-          (200 / 600) * element.contentRect.width
+        canvasElement.width = Math.floor(
+          element.contentRect.width * window.devicePixelRatio
         );
+        canvasElement.height = Math.floor(
+          (200 / 600) * element.contentRect.width * devicePixelRatio
+        );
+
+        canvasElement.style.height = `${Math.floor(
+          (200 / 600) * element.contentRect.width
+        )}px`;
+
         return;
       }
     });
