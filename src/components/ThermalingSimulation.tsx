@@ -6,6 +6,7 @@ import { Thermal } from "../models/Thermal";
 import { GliderController } from "../models/GliderController";
 import { Glider } from "../models/Glider";
 import { Simulation } from "../Simulation";
+import { Checkbox } from "@mantine/core";
 
 type ThermalingSimulationProps = {
   x: number;
@@ -42,7 +43,8 @@ export const ThermalingSimulation = ({
 }: ThermalingSimulationProps) => {
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const speed = 2;
-  // const [speed, setSpeed] = useState(2);
+  const [shouldRenderOverheadView, setShouldRenderOverheadView] =
+    useState(false);
 
   const [simulation, setSimulation] = useState(
     makeSimulation(x, y, controller, speed)
@@ -65,12 +67,12 @@ export const ThermalingSimulation = ({
 
     if (!ctx) return;
 
-    // canvasElement.width = canvasElement.contentRect.width;
-    // canvasElement.height = canvasElement.contentRect.height;
     const observer = new ResizeObserver((elements) => {
       for (const element of elements) {
         canvasElement.width = element.contentRect.width;
-        canvasElement.height = element.contentRect.height;
+        canvasElement.height = Math.floor(
+          (200 / 600) * element.contentRect.width
+        );
         return;
       }
     });
@@ -91,7 +93,12 @@ export const ThermalingSimulation = ({
       );
       prevTimeStamp = nextTimeStamp;
 
-      simulation.draw(ctx, canvasElement.width, canvasElement.height);
+      simulation.draw(
+        ctx,
+        canvasElement.width,
+        canvasElement.height,
+        shouldRenderOverheadView
+      );
       requestAnimationFrame(loop);
     }
 
@@ -101,7 +108,7 @@ export const ThermalingSimulation = ({
       stop = true;
       observer.disconnect();
     };
-  }, [controller, duration, simulation, x, y]);
+  }, [controller, duration, shouldRenderOverheadView, simulation, x, y]);
   simulation.timeAcceleration = speed;
   return (
     <div>
@@ -129,8 +136,15 @@ export const ThermalingSimulation = ({
       <div>
         <canvas
           ref={canvasRef}
-          style={{ display: "block", width: "100%", height: `200px` }}
+          style={{ display: "block", width: "100%" }}
         ></canvas>
+        <Checkbox
+          label="Reveal thermal?"
+          checked={shouldRenderOverheadView}
+          onChange={(e) => {
+            setShouldRenderOverheadView(e.target.checked);
+          }}
+        ></Checkbox>
       </div>
     </div>
   );

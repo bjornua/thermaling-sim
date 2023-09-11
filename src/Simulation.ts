@@ -15,9 +15,10 @@ export class Simulation {
   draw(
     ctx: CanvasRenderingContext2D,
     canvasWidth: number,
-    canvasHeight: number
+    canvasHeight: number,
+    shouldRenderOverheadView: boolean
   ) {
-    ctx.fillStyle = "#eeeeee";
+    ctx.fillStyle = "#ffffff";
     ctx.fillRect(0, 0, canvasWidth, canvasHeight);
 
     canvasWidth = canvasWidth < 100 ? 100 : canvasWidth;
@@ -41,18 +42,21 @@ export class Simulation {
       canvasHeight - 20,
       this.world.glider.lift
     );
-    renderOverheadView(
-      ctx,
-      width * 2 + 10,
-      10,
-      width - 20,
-      canvasHeight - 20,
-      0,
-      0,
-      600,
-      600,
-      this.world.thermal,
-      this.world.glider
-    );
+
+    if (shouldRenderOverheadView) {
+      renderOverheadView(
+        ctx,
+        width * 2 + 10,
+        10,
+        width - 20,
+        canvasHeight - 20,
+        0,
+        0,
+        600,
+        600,
+        this.world.thermal,
+        this.world.glider
+      );
+    }
   }
 }

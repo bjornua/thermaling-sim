@@ -98,6 +98,8 @@ function drawScaleDivisionsAndLabels(
     );
 
     ctx.fillStyle = "#000";
+    ctx.font = `bold 12px Arial`;
+
     ctx.fillText(label, labelX - ctx.measureText(label).width / 2, labelY + 5); // Adjusting for text alignment
   }
 }

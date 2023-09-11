@@ -27,8 +27,13 @@ export default function renderView(
   const scaleY = height / worldHeight;
   const scaleFactor = Math.min(scaleX, scaleY);
 
-  const toCanvasX = (wx: number) => worldToCanvas(wx, worldX, x, scaleFactor);
-  const toCanvasY = (wy: number) => worldToCanvas(wy, worldY, y, scaleFactor);
+  const gapX = width - worldWidth * scaleFactor;
+  const gapY = height - worldHeight * scaleFactor;
+
+  const toCanvasX = (wx: number) =>
+    worldToCanvas(wx, worldX, x + gapX / 2, scaleFactor);
+  const toCanvasY = (wy: number) =>
+    worldToCanvas(wy, worldY, y + gapY / 2, scaleFactor);
 
   drawThermal(ctx, toCanvasX, toCanvasY, scaleFactor, thermal);
   drawGlider(ctx, toCanvasX, toCanvasY, glider);

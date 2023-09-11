@@ -17,21 +17,10 @@ export default function render(
   const centerX = x + (width - diameter) / 2 + radius;
   const centerY = y + (height - diameter) / 2 + radius;
 
-  clearCanvas(ctx, x, y, width, height);
   drawDynamicContents(ctx, centerX, centerY, radius - 2, bankAngle);
   drawBankAngleArrow(ctx, centerX, centerY, radius - 2);
   drawOuterCircle(ctx, centerX, centerY, radius);
   drawPlaneSymbol(ctx, centerX, centerY);
-}
-
-function clearCanvas(
-  ctx: CanvasRenderingContext2D,
-  x: number,
-  y: number,
-  width: number,
-  height: number
-) {
-  ctx.clearRect(x, y, width, height);
 }
 
 function drawOuterCircle(
