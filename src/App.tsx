@@ -9,6 +9,27 @@ export default function App() {
       <MantineProvider withGlobalStyles withNormalizeCSS>
         <Container size="sm">
           <h1>Navigating the Invisible: Understanding Thermal Soaring</h1>
+          <h2>Table of Contents</h2>
+          <ul>
+            <li>
+              <a href="#basic-awareness">Basic Awareness</a>
+            </li>
+            <li>
+              <a href="#turning">Turning</a>
+            </li>
+            <li>
+              <a href="#first-attempt">First Attempt At Centering</a>
+            </li>
+            <li>
+              <a href="#centering">Centering in a Thermal</a>
+            </li>
+            <li>
+              <a href="#widening-tightening">Widening and Tightening</a>
+            </li>
+            <li>
+              <a href="#caveats">Caveats and Considerations</a>
+            </li>
+          </ul>
           <p>
             Thermal soaring presents a fascinating yet challenging paradigm for
             aviators. Thermals, columns of rising air, are invisible, often
@@ -16,7 +37,7 @@ export default function App() {
             strategies to harness their lift. This webpage presents a guided
             walkthrough of strategies.
           </p>
-          <h2>Level 1: Basic Awareness</h2>
+          <h2 id="basic-awareness">Basic Awareness</h2>
           <p>
             At its most fundamental level, thermal soaring involves recognizing
             that you are in a thermal.
@@ -33,7 +54,7 @@ export default function App() {
             decreases again as continues through the thermal, until finally
             exiting it.
           </p>
-          <h2>Level 2: Turning</h2>
+          <h2 id="turning">Turning</h2>
           <p>
             Once a thermal is detected, an improvement to flying right through
             is to start banking at a fixed angle. That's it, you are now
@@ -50,7 +71,7 @@ export default function App() {
             thermal. Notice how the variometer is cycling between high and low
             as the glider makes its way around the thermal.
           </p>
-          <h2>Level 3: First Attempt At Centering</h2>
+          <h2 id="first-attempt">First Attempt At Centering</h2>
           <p>
             To maximize the lift gained from a thermal, pilots aim to stay in
             its strongest core. This involves making adjustments to the turning
@@ -72,7 +93,7 @@ export default function App() {
             Notice how, counterintuitively, this strategy is actually a pretty
             reliable way of exiting the thermal!
           </p>
-          <h2>Level 4: Centering in a Thermal</h2>
+          <h2 id="centering">Centering in a Thermal</h2>
           <p>
             A better technique is to tighten the turn when the variometer
             indicates falling lift, as it suggests that the glider is nearing
@@ -90,7 +111,7 @@ export default function App() {
             thermal. As the lift decreases, the glider tightens its turn,
             successfully centering itself in the thermal.
           </p>
-          <h2>Level 5: Widening and Tightening</h2>
+          <h2 id="widening-tightening">Widening and Tightening</h2>
           <p>
             For faster and more efficient centering, pilots can employ a
             combination of both widening and tightening their turns. When the
@@ -111,11 +132,25 @@ export default function App() {
             effectively widening and tightening its turns based on the lift
             experienced.
           </p>
+
+          <h2 id="caveats">Caveats and Considerations</h2>
           <p>
-            We explore various strategies for centering in thermals, relying
-            solely on output of the variometer. It's worth noting that in
-            real-world applications, glider pilots may also sense changes in
-            lift through change in acceleration.
+            The intention of the simulation is to offer a basic introduction to
+            the principles of thermal soaring. It represents a vastly simplified
+            model of real-world thermals. Actual thermals can exhibit tremendous
+            variance in their characteristics and shapes, and are influenced by
+            factors such as terrain and weather.
+          </p>
+          <p>
+            Additionally, while the variometer reacts instantaneously in the
+            simulation, real-world variometers can have several seconds of lag,
+            introducing an additional layer of complexity.
+          </p>
+          <p>
+            As always, while theories and simulations provide foundational
+            knowledge, hands-on experience in safe environments is invaluable.
+            Be sure to experiment and deepen your own understanding of lift and
+            thermaling techniques.
           </p>
           <p>
             The source code for these simulations is publicly available here:{" "}
