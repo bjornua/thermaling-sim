@@ -2,10 +2,10 @@ import { useRef, useEffect } from "react";
 
 import { World } from "../models/World";
 import { useState } from "react";
-import { Container, List, Slider, Text } from "@mantine/core";
 import { Thermal } from "../models/Thermal";
 import { GliderController } from "../models/GliderController";
 import { Glider } from "../models/Glider";
+import { Simulation } from "../Simulation";
 
 type ThermalingSimulationProps = {
   x: number;
@@ -14,10 +14,24 @@ type ThermalingSimulationProps = {
   duration: number;
 };
 
-function makeWorld(x: number, y: number, controller: GliderController): World {
+function makeSimulation(
+  x: number,
+  y: number,
+  controller: GliderController,
+  timeAcceleration: number
+): Simulation {
   const thermal = new Thermal(300, 300, 5, 250);
 
-  return new World(600, 800, thermal, new Glider(x, y, "#00F", controller));
+  const world = new World(
+    600,
+    800,
+    thermal,
+    new Glider(x, y, "#00F", controller)
+  );
+
+  const simulation = new Simulation(world, timeAcceleration);
+
+  return simulation;
 }
 
 export const ThermalingSimulation = ({
@@ -27,8 +41,12 @@ export const ThermalingSimulation = ({
   duration,
 }: ThermalingSimulationProps) => {
   const canvasRef = useRef<HTMLCanvasElement>(null);
-  const [speed, setSpeed] = useState(2);
-  const [world, setWorld] = useState(makeWorld(x, y, controller));
+  const speed = 2;
+  // const [speed, setSpeed] = useState(2);
+
+  const [simulation, setSimulation] = useState(
+    makeSimulation(x, y, controller, speed)
+  );
 
   useEffect(() => {
     let stop = false;
@@ -40,17 +58,15 @@ export const ThermalingSimulation = ({
       const ctx = canvasRef.current?.getContext("2d");
       if (!ctx || stop) return;
 
-      ctx.clearRect(0, 0, world.width, world.height);
-
       const nextTimeStamp = Date.now();
       if (nextTimeStamp - startTime > duration) {
-        setWorld(makeWorld(x, y, controller));
+        setSimulation(makeSimulation(x, y, controller, speed));
       }
-      world.update(
+      simulation.update(
         prevTimeStamp === null ? 0 : (nextTimeStamp - prevTimeStamp) / 1000
       );
       prevTimeStamp = nextTimeStamp;
-      world.draw(ctx);
+      simulation.draw(ctx, 600, 200);
       requestAnimationFrame(loop);
     }
 
@@ -59,8 +75,8 @@ export const ThermalingSimulation = ({
     return () => {
       stop = true;
     };
-  }, [controller, duration, world, x, y]);
-  world.timeAcceleration = speed;
+  }, [controller, duration, simulation, x, y]);
+  simulation.timeAcceleration = speed;
   return (
     <div>
       {/* <Container fluid style={{ flexGrow: 1 }}>
@@ -87,8 +103,8 @@ export const ThermalingSimulation = ({
       <div>
         <canvas
           ref={canvasRef}
-          width={`${world.scaleToPixel(world.width)}px`}
-          height={`${world.scaleToPixel(world.height)}px`}
+          width={`600px`}
+          height={`200px`}
           style={{ display: "block" }}
         ></canvas>
       </div>

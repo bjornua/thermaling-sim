@@ -18,22 +18,4 @@ export class Thermal {
   calculateDistanceToCenterFromLift(lift: number): number {
     return this.radius * (1 - lift / this.maxLift);
   }
-
-  draw(ctx: CanvasRenderingContext2D, scaleFactor: number) {
-    for (let i = 0; i <= 4; i++) {
-      const lift = (i / 5) * this.maxLift;
-      const radius = this.calculateDistanceToCenterFromLift(lift) * scaleFactor;
-      ctx.strokeStyle = "#f00";
-      ctx.lineWidth = 1;
-      ctx.beginPath();
-      ctx.arc(
-        this.x * scaleFactor,
-        this.y * scaleFactor,
-        radius,
-        0,
-        2 * Math.PI
-      );
-      ctx.stroke();
-    }
-  }
 }
