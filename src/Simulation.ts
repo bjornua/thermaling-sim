@@ -12,20 +12,41 @@ export class Simulation {
     this.world.update(acceleratedElapsedTime);
   }
 
-  draw(ctx: CanvasRenderingContext2D, width: number, height: number) {
-    ctx.clearRect(0, 0, width, height);
+  draw(
+    ctx: CanvasRenderingContext2D,
+    canvasWidth: number,
+    canvasHeight: number
+  ) {
+    ctx.fillStyle = "#eeeeee";
+    ctx.fillRect(0, 0, canvasWidth, canvasHeight);
 
-    // drawRectangle(ctx, 0, 0, 200, 200);
-    // drawRectangle(ctx, 200, 0, 200, 200);
-    // drawRectangle(ctx, 400, 0, 200, 200);
-    renderAttitudeIndicator(ctx, 10, 10, 180, 180, this.world.glider.bankAngle);
-    renderVarioMeter(ctx, 210, 10, 180, 180, this.world.glider.lift);
+    canvasWidth = canvasWidth < 100 ? 100 : canvasWidth;
+    canvasHeight = canvasHeight < 100 ? 100 : canvasHeight;
+
+    const width = canvasWidth / 3;
+
+    renderAttitudeIndicator(
+      ctx,
+      width * 0 + 10,
+      10,
+      width - 20,
+      canvasHeight - 20,
+      this.world.glider.bankAngle
+    );
+    renderVarioMeter(
+      ctx,
+      width * 1 + 10,
+      10,
+      width - 20,
+      canvasHeight - 20,
+      this.world.glider.lift
+    );
     renderOverheadView(
       ctx,
-      410,
+      width * 2 + 10,
       10,
-      180,
-      180,
+      width - 20,
+      canvasHeight - 20,
       0,
       0,
       600,

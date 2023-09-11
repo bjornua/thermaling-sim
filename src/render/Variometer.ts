@@ -96,6 +96,8 @@ function drawScaleDivisionsAndLabels(
       radius - labelOffset,
       angle
     );
+
+    ctx.fillStyle = "#000";
     ctx.fillText(label, labelX - ctx.measureText(label).width / 2, labelY + 5); // Adjusting for text alignment
   }
 }

@@ -54,9 +54,33 @@ export const ThermalingSimulation = ({
     const startTime = Date.now();
     let prevTimeStamp: number | null = startTime;
 
+    if (stop) return;
+
+    const canvasElement = canvasRef.current;
+    if (!canvasElement) return;
+
+    const ctx = canvasElement.getContext("2d", {
+      alpha: false,
+    });
+
+    if (!ctx) return;
+
+    // canvasElement.width = canvasElement.contentRect.width;
+    // canvasElement.height = canvasElement.contentRect.height;
+    const observer = new ResizeObserver((elements) => {
+      for (const element of elements) {
+        canvasElement.width = element.contentRect.width;
+        canvasElement.height = element.contentRect.height;
+        return;
+      }
+    });
+
+    observer.observe(canvasElement);
+
     function loop() {
-      const ctx = canvasRef.current?.getContext("2d");
-      if (!ctx || stop) return;
+      if (stop) return;
+      if (!ctx) return;
+      if (!canvasElement) return;
 
       const nextTimeStamp = Date.now();
       if (nextTimeStamp - startTime > duration) {
@@ -66,7 +90,8 @@ export const ThermalingSimulation = ({
         prevTimeStamp === null ? 0 : (nextTimeStamp - prevTimeStamp) / 1000
       );
       prevTimeStamp = nextTimeStamp;
-      simulation.draw(ctx, 600, 200);
+
+      simulation.draw(ctx, canvasElement.width, canvasElement.height);
       requestAnimationFrame(loop);
     }
 
@@ -74,6 +99,7 @@ export const ThermalingSimulation = ({
 
     return () => {
       stop = true;
+      observer.disconnect();
     };
   }, [controller, duration, simulation, x, y]);
   simulation.timeAcceleration = speed;
@@ -103,9 +129,7 @@ export const ThermalingSimulation = ({
       <div>
         <canvas
           ref={canvasRef}
-          width={`600px`}
-          height={`200px`}
-          style={{ display: "block" }}
+          style={{ display: "block", width: "100%", height: `200px` }}
         ></canvas>
       </div>
     </div>
