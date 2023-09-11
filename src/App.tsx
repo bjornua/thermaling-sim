@@ -135,22 +135,26 @@ export default function App() {
 
           <h2 id="caveats">Caveats and Considerations</h2>
           <p>
-            The intention of the simulation is to offer a basic introduction to
-            the principles of thermal soaring. It represents a vastly simplified
-            model of real-world thermals. Actual thermals can exhibit tremendous
-            variance in their characteristics and shapes, and are influenced by
-            factors such as terrain and weather.
+            The simulation is designed to provide a basic introduction to the
+            principles of thermal soaring. However, it's a greatly simplified
+            representation of real-world thermals. In reality, thermals can vary
+            significantly in their characteristics and shapes, influenced by
+            factors like terrain and weather.
           </p>
           <p>
-            Additionally, while the variometer reacts instantaneously in the
-            simulation, real-world variometers can have several seconds of lag,
-            introducing an additional layer of complexity.
+            In the real world, you'll find that the variometer might momentarily
+            respond to various disturbances that aren't necessarily thermals.
+            Therefore, it's a good idea to exercise patience and consider moving
+            on if you don't experience any lift.
           </p>
           <p>
-            As always, while theories and simulations provide foundational
-            knowledge, hands-on experience in safe environments is invaluable.
-            Be sure to experiment and deepen your own understanding of lift and
-            thermaling techniques.
+            Moreover, while the variometer in the simulation reacts instantly,
+            real-world variometers may have a lag of several seconds, adding
+            another dimension of complexity.
+          </p>
+          <p>
+            Overall, while theories and simulations are informative, there's no
+            substitute for hands-on experience.
           </p>
           <p>
             The source code for these simulations is publicly available here:{" "}
