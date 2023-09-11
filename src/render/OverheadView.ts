@@ -56,21 +56,25 @@ function drawGlider(
 
   // Draw the bank angle
   ctx.fillStyle = "#000";
-  ctx.font = `12px Arial`;
+  ctx.font = `${12 * window.devicePixelRatio}px Arial`;
   ctx.fillText(
     `Bank: ${glider.bankAngle.toFixed(0)}°`,
-    pixelX + 15,
-    pixelY - 6
+    pixelX + 15 * window.devicePixelRatio,
+    pixelY - 6 * window.devicePixelRatio
   );
 
   // Draw the lift value
-  ctx.fillText(`Lift: ${glider.lift.toFixed(2)} m/s`, pixelX + 15, pixelY + 6);
+  ctx.fillText(
+    `Lift: ${glider.lift.toFixed(2)} m/s`,
+    pixelX + 15 * window.devicePixelRatio,
+    pixelY + 6 * window.devicePixelRatio
+  );
 
   // Draw the height
   ctx.fillText(
     `Height: ${glider.height.toFixed(0)}m`,
-    pixelX + 15,
-    pixelY + 18
+    pixelX + 15 * window.devicePixelRatio,
+    pixelY + 18 * window.devicePixelRatio
   );
 
   // Draw trace
@@ -127,7 +131,7 @@ function drawThermal(
     const canvasRadius = worldRadius * scaleFactor;
 
     ctx.strokeStyle = "#f00";
-    ctx.lineWidth = 1;
+    ctx.lineWidth = window.devicePixelRatio * 1;
     ctx.beginPath();
     ctx.arc(centerX, centerY, canvasRadius, 0, 2 * Math.PI);
     ctx.stroke();

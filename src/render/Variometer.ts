@@ -10,16 +10,14 @@ export default function render(
   const centerX = x + width / 2;
   const centerY = y + height / 2;
   const scaleRadius = Math.min(width, height) / 2;
-  const divisionLength = 10; // Length of the division line
-  const labelOffset = 20; // Offset from the division line to the label
+  const divisionLength = 10 * window.devicePixelRatio; // Length of the division line
+  const labelOffset = 20 * window.devicePixelRatio; // Offset from the division line to the label
 
   // Drawing properties
   const scaleStartAngle = Math.PI / 4;
   const scaleEndAngle = (7 * Math.PI) / 4;
   const scaleDivisions = 10;
   const scaleDivisionAngle = (scaleEndAngle - scaleStartAngle) / scaleDivisions;
-
-  ctx.lineWidth = 1;
 
   drawScale(
     ctx,
@@ -60,6 +58,7 @@ function drawScale(
   endAngle: number
 ) {
   ctx.beginPath();
+  ctx.lineWidth = window.devicePixelRatio * 2;
   ctx.arc(centerX, centerY, radius, startAngle, endAngle);
   ctx.stroke();
 }
@@ -87,6 +86,8 @@ function drawScaleDivisionsAndLabels(
     ctx.beginPath();
     ctx.moveTo(x1, y1);
     ctx.lineTo(x2, y2);
+
+    ctx.lineWidth = window.devicePixelRatio * 2;
     ctx.stroke();
 
     const label = (i - 5).toString();
@@ -98,9 +99,13 @@ function drawScaleDivisionsAndLabels(
     );
 
     ctx.fillStyle = "#000";
-    ctx.font = `bold 12px Arial`;
+    ctx.font = `bold ${12 * window.devicePixelRatio}px Arial`;
 
-    ctx.fillText(label, labelX - ctx.measureText(label).width / 2, labelY + 5); // Adjusting for text alignment
+    ctx.fillText(
+      label,
+      labelX - ctx.measureText(label).width / 2,
+      labelY + 6 * window.devicePixelRatio
+    ); // Adjusting for text alignment
   }
 }
 
@@ -126,6 +131,7 @@ function drawNeedle(
   ctx.beginPath();
   ctx.moveTo(centerX, centerY);
   ctx.lineTo(needleX, needleY);
+  ctx.lineWidth = window.devicePixelRatio * 2;
   ctx.stroke();
 }
 
