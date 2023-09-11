@@ -6,7 +6,7 @@ export type BankingStrategy = (
 ) => boolean;
 
 export class Glider {
-  public angle = 0; // Current angle in radians
+  public headingAngle = 0; // Current angle in radians
   public speed = 90; // 90 km/h in m/s
   private readonly G = 9.81; // Acceleration due to gravity in m/s^2
   public lift = 0;
@@ -18,13 +18,30 @@ export class Glider {
     [];
   private traceDuration = 10;
   private totalElapsedTime = 0; // Total elapsed time for trace
-
+  public x: number;
+  public y: number;
   constructor(
-    public x: number,
-    public y: number,
+    public startX: number,
+    public startY: number,
     public color: string,
     public controller: GliderController
-  ) {}
+  ) {
+    this.x = this.startX;
+    this.y = this.startY;
+  }
+
+  reset() {
+    this.x = this.startX;
+    this.y = this.startY;
+    this.bankAngle = 0;
+    this.controller.reset();
+    this.targetBankAngle = 0;
+    this.height = 500;
+    this.trace = [];
+    this.totalElapsedTime = 0;
+    this.lift = 0;
+    this.headingAngle = 0;
+  }
 
   update(lift: number, elapsedTime: number): void {
     this.height += elapsedTime * lift;
@@ -58,11 +75,11 @@ export class Glider {
       Math.tan((this.bankAngle * Math.PI) / 180); // Convert bank angle to radians
     const angularDistance = angularSpeed * elapsedTime;
 
-    this.angle += angularDistance;
+    this.headingAngle += angularDistance;
 
     const distance = speedMetersPerSecond * elapsedTime;
-    this.x += distance * Math.cos(this.angle);
-    this.y += distance * Math.sin(this.angle);
+    this.x += distance * Math.cos(this.headingAngle);
+    this.y += distance * Math.sin(this.headingAngle);
   }
 
   private updateBankAngle(elapsedTime: number): void {

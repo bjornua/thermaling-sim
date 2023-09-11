@@ -19,7 +19,8 @@ function makeSimulation(
   x: number,
   y: number,
   controller: GliderController,
-  timeAcceleration: number
+  timeAcceleration: number,
+  duration: number
 ): Simulation {
   const thermal = new Thermal(300, 300, 5, 250);
 
@@ -30,7 +31,7 @@ function makeSimulation(
     new Glider(x, y, "#00F", controller)
   );
 
-  const simulation = new Simulation(world, timeAcceleration);
+  const simulation = new Simulation(world, timeAcceleration, duration);
 
   return simulation;
 }
@@ -46,38 +47,17 @@ export const ThermalingSimulation = ({
   const [shouldRenderOverheadView, setShouldRenderOverheadView] =
     useState(false);
 
-  const [simulation, setSimulation] = useState(
-    makeSimulation(x, y, controller, speed)
-  );
-
   useEffect(() => {
     let stop = false;
+    const simulation = makeSimulation(x, y, controller, speed, duration);
 
-    const startTime = Date.now();
-    let prevTimeStamp: number | null = startTime;
-
-    if (stop) return;
+    let prevTimeStamp: number = Date.now();
 
     const canvasElement = canvasRef.current;
     if (!canvasElement) return;
-
-    const ctx = canvasElement.getContext("2d", {
-      alpha: false,
-    });
+    const ctx = canvasElement.getContext("2d", { alpha: false });
 
     if (!ctx) return;
-
-    const observer = new ResizeObserver((elements) => {
-      for (const element of elements) {
-        canvasElement.width = element.contentRect.width;
-        canvasElement.height = Math.floor(
-          (200 / 600) * element.contentRect.width
-        );
-        return;
-      }
-    });
-
-    observer.observe(canvasElement);
 
     function loop() {
       if (stop) return;
@@ -85,12 +65,8 @@ export const ThermalingSimulation = ({
       if (!canvasElement) return;
 
       const nextTimeStamp = Date.now();
-      if (nextTimeStamp - startTime > duration) {
-        setSimulation(makeSimulation(x, y, controller, speed));
-      }
-      simulation.update(
-        prevTimeStamp === null ? 0 : (nextTimeStamp - prevTimeStamp) / 1000
-      );
+
+      simulation.update((nextTimeStamp - prevTimeStamp) / 1000);
       prevTimeStamp = nextTimeStamp;
 
       simulation.draw(
@@ -101,15 +77,25 @@ export const ThermalingSimulation = ({
       );
       requestAnimationFrame(loop);
     }
-
     loop();
+
+    const observer = new ResizeObserver((elements) => {
+      for (const element of elements) {
+        canvasElement.width = element.contentRect.width;
+        canvasElement.height = Math.floor(
+          (200 / 600) * element.contentRect.width
+        );
+        return;
+      }
+    });
+    observer.observe(canvasElement);
 
     return () => {
       stop = true;
       observer.disconnect();
     };
-  }, [controller, duration, shouldRenderOverheadView, simulation, x, y]);
-  simulation.timeAcceleration = speed;
+  }, [controller, duration, shouldRenderOverheadView, x, y]);
+
   return (
     <div>
       {/* <Container fluid style={{ flexGrow: 1 }}>
@@ -139,6 +125,7 @@ export const ThermalingSimulation = ({
           style={{ display: "block", width: "100%" }}
         ></canvas>
         <Checkbox
+          mb="md"
           label="Reveal thermal?"
           checked={shouldRenderOverheadView}
           onChange={(e) => {

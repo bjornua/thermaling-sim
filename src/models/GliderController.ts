@@ -1,20 +1,22 @@
 export interface GliderController {
+  reset(): void;
   update(lift: number, elapsedTime: number): number;
-  rules(): [boolean, string][];
 }
 
 type AdaptiveBankingState = "increase" | "neutral" | "decrease";
 
 export class AdaptiveBanking implements GliderController {
   public previousLift = 0;
-  public activeState: AdaptiveBankingState;
+  public activeState: AdaptiveBankingState = "neutral";
 
   constructor(
     public bankWhenGainingLift: number,
     public bankWhenNeutral: number,
     public bankWhenLoosingLift: number
-  ) {
-    // Initialize the activeState to 'neutral' or any other suitable default
+  ) {}
+
+  reset() {
+    this.previousLift = 0;
     this.activeState = "neutral";
   }
 
@@ -49,22 +51,5 @@ export class AdaptiveBanking implements GliderController {
       default:
         throw new Error(`Invalid state: ${this.activeState}`);
     }
-  }
-
-  rules(): [boolean, string][] {
-    return [
-      [
-        "increase" === this.activeState,
-        `When gaining lift, bank ${this.bankWhenGainingLift}`,
-      ],
-      [
-        "neutral" === this.activeState,
-        `When lift stays the same, bank ${this.bankWhenNeutral}`,
-      ],
-      [
-        "decrease" === this.activeState,
-        `When losing lift, bank ${this.bankWhenLoosingLift}`,
-      ],
-    ];
   }
 }

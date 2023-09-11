@@ -9,6 +9,10 @@ export class World {
     public glider: Glider
   ) {}
 
+  reset() {
+    this.glider.reset();
+  }
+
   update(elapsedTime: number) {
     const lift = this.thermal.calculateLift(this.glider.x, this.glider.y);
     this.glider.update(lift, elapsedTime);

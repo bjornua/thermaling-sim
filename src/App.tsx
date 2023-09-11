@@ -23,7 +23,7 @@ export default function App() {
           </p>
           <ThermalingSimulation
             controller={new AdaptiveBanking(0, 0, 0)}
-            duration={10000}
+            duration={25}
             x={0}
             y={150}
           />
@@ -41,7 +41,7 @@ export default function App() {
           </p>
           <ThermalingSimulation
             controller={new AdaptiveBanking(45, 45, 45)}
-            duration={10000}
+            duration={60}
             x={150}
             y={150}
           />
@@ -64,9 +64,9 @@ export default function App() {
           </p>
           <ThermalingSimulation
             controller={new AdaptiveBanking(60, 45, 45)}
-            duration={10000}
-            x={0}
-            y={150}
+            duration={40}
+            x={200}
+            y={200}
           />
           <p>
             Notice how, counterintuitively, this strategy is actually a pretty
@@ -80,7 +80,7 @@ export default function App() {
           </p>
           <ThermalingSimulation
             controller={new AdaptiveBanking(45, 45, 60)}
-            duration={10000}
+            duration={60}
             x={0}
             y={150}
           />
@@ -101,7 +101,7 @@ export default function App() {
           </p>
           <ThermalingSimulation
             controller={new AdaptiveBanking(30, 45, 60)}
-            duration={10000}
+            duration={60}
             x={0}
             y={150}
           />

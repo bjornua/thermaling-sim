@@ -1,15 +1,32 @@
 import renderAttitudeIndicator from "./render/ArtificialHorizon";
 import renderVarioMeter from "./render/Variometer";
 import renderOverheadView from "./render/OverheadView";
+import renderProgress from "./render/Progress";
 
 import { World } from "./models/World";
 
 export class Simulation {
-  constructor(public world: World, public timeAcceleration: number) {}
+  public totalElapsed: number = 0;
 
-  update(elapsedTime: number) {
-    const acceleratedElapsedTime = this.timeAcceleration * elapsedTime;
-    this.world.update(acceleratedElapsedTime);
+  constructor(
+    public world: World,
+    public timeAcceleration: number,
+    public maxDuration: number | null = null
+  ) {}
+
+  update(clockElapsedTime: number) {
+    const elapsedTime = this.timeAcceleration * clockElapsedTime;
+    this.totalElapsed += elapsedTime;
+
+    if (this.maxDuration !== null && this.totalElapsed > this.maxDuration) {
+      this.reset();
+    }
+    this.world.update(elapsedTime);
+  }
+
+  reset() {
+    this.totalElapsed = 0;
+    this.world.reset();
   }
 
   draw(
@@ -56,6 +73,17 @@ export class Simulation {
         600,
         this.world.thermal,
         this.world.glider
+      );
+    }
+
+    if (this.maxDuration) {
+      renderProgress(
+        ctx,
+        0,
+        0,
+        canvasWidth,
+        1,
+        this.totalElapsed / this.maxDuration
       );
     }
   }
