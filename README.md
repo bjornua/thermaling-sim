@@ -1,14 +1,5 @@
 # Thermal Centering Simulations
 
-Welcome to the Thermal Centering Simulations! These simulations aims to showcase various strategies for centering in thermals by relying solely on a variometer, which measures your vertical speed in real-time.
-
-## What you are seeing
-
-- **Not Banking**: In this context, "not banking" means maintaining a 25-degree bank angle, which serves as the default or neutral state.
-- **Banking**: When the glider decides to bank, it will switch to a 45-degree bank angle, representing a more aggressive turn into the thermal.
-
-In the simulations, dots represent gliders circling within thermals. The objective is to understand how different banking decisions affect the glider's ability to stay within the thermal's core and gain altitude.
-
 ## View Online
 
 The simulations can be accessed and interacted with via the following link: [https://thermal-sim.netlify.app/](https://thermal-sim.netlify.app/)
