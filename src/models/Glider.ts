@@ -6,20 +6,20 @@ export type BankingStrategy = (
 ) => boolean;
 
 export class Glider {
-  public headingAngle = 0; // Current angle in radians
-  public speed = 90; // 90 km/h in m/s
-  private readonly G = 9.81; // Acceleration due to gravity in m/s^2
+  public readonly speed = 90; // 90 km/h in m/s
+  public readonly G = 9.81; // Acceleration due to gravity in m/s^2
+  public readonly maxBankRate = 10; // Maximum rate of bank angle change in degrees per second
   public lift = 0;
+  public headingAngle = 0; // Current angle in radians
   public height = 500;
   public bankAngle = 0; // Bank angle in degrees
   public targetBankAngle = 0; // Target bank angle in degrees
-  public maxBankRate = 10; // Maximum rate of bank angle change in degrees per second
-  public trace: { x: number; y: number; bankAngle: number; time: number }[] =
-    [];
-  private traceDuration = 10;
-  private totalElapsedTime = 0; // Total elapsed time for trace
+  public trace: { x: number; y: number; bankAngle: number }[] = [];
   public x: number;
   public y: number;
+  public totalElapsedTime: number = 0; // Total elapsed time for trace
+  public lastTraceUpdateTime: number = 0;
+
   constructor(
     public startX: number,
     public startY: number,
@@ -41,6 +41,7 @@ export class Glider {
     this.totalElapsedTime = 0;
     this.lift = 0;
     this.headingAngle = 0;
+    this.lastTraceUpdateTime = 0;
   }
 
   update(lift: number, elapsedTime: number): void {
@@ -53,17 +54,18 @@ export class Glider {
     // Update total elapsed time
     this.totalElapsedTime += elapsedTime;
 
-    // Add the new trace point
-    this.trace.push({
-      x: this.x,
-      y: this.y,
-      bankAngle: this.bankAngle,
-      time: this.totalElapsedTime,
-    });
+    // Check if it's time to add a new trace point
+    if (this.totalElapsedTime - this.lastTraceUpdateTime >= 0.2) {
+      this.trace.push({
+        x: this.x,
+        y: this.y,
+        bankAngle: this.bankAngle,
+      });
+      this.lastTraceUpdateTime = this.totalElapsedTime; // <-- Update the last trace update time
+    }
 
     // Remove the outdated trace points
-    const minTime = this.totalElapsedTime - this.traceDuration;
-    while (this.trace.length > 0 && this.trace[0].time < minTime) {
+    while (this.trace.length > 500) {
       this.trace.shift();
     }
   }

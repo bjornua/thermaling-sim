@@ -1,145 +1,150 @@
-export default function render(
-  ctx: CanvasRenderingContext2D,
-  x: number,
-  y: number,
-  width: number,
-  height: number,
-  lift: number
-) {
-  // Dimensions
-  const centerX = x + width / 2;
-  const centerY = y + height / 2;
-  const scaleRadius = Math.min(width, height) / 2;
-  const divisionLength = 10 * window.devicePixelRatio; // Length of the division line
-  const labelOffset = 20 * window.devicePixelRatio; // Offset from the division line to the label
+export default class Renderer {
+  private ctx: CanvasRenderingContext2D;
+  private x: number;
+  private y: number;
+  private width: number;
+  private height: number;
+  private staticContent: HTMLCanvasElement;
 
-  // Drawing properties
-  const scaleStartAngle = Math.PI / 4;
-  const scaleEndAngle = (7 * Math.PI) / 4;
-  const scaleDivisions = 10;
-  const scaleDivisionAngle = (scaleEndAngle - scaleStartAngle) / scaleDivisions;
+  private centerX: number;
+  private centerY: number;
+  private scaleRadius: number;
+  private scaleStartAngle = Math.PI / 4;
+  private scaleEndAngle = (7 * Math.PI) / 4;
+  private scaleDivisions = 10;
+  private divisionLength = 10 * window.devicePixelRatio;
+  private labelOffset = 20 * window.devicePixelRatio;
+  private scaleDivisionAngle: number;
 
-  drawScale(
-    ctx,
-    centerX,
-    centerY,
-    scaleRadius - 1,
-    scaleStartAngle,
-    scaleEndAngle
-  );
-  drawScaleDivisionsAndLabels(
-    ctx,
-    centerX,
-    centerY,
-    scaleRadius,
-    scaleDivisions,
-    divisionLength,
-    labelOffset,
-    scaleDivisionAngle
-  );
-  drawNeedle(
-    ctx,
-    centerX,
-    centerY,
-    scaleRadius,
-    lift,
-    scaleStartAngle,
-    scaleEndAngle,
-    divisionLength
-  );
-}
+  constructor(
+    ctx: CanvasRenderingContext2D,
+    x: number,
+    y: number,
+    width: number,
+    height: number
+  ) {
+    this.ctx = ctx;
+    this.x = x;
+    this.y = y;
+    this.width = width;
+    this.height = height;
 
-function drawScale(
-  ctx: CanvasRenderingContext2D,
-  centerX: number,
-  centerY: number,
-  radius: number,
-  startAngle: number,
-  endAngle: number
-) {
-  ctx.beginPath();
-  ctx.lineWidth = window.devicePixelRatio * 2;
-  ctx.arc(centerX, centerY, radius, startAngle, endAngle);
-  ctx.stroke();
-}
+    this.centerX = width / 2;
+    this.centerY = height / 2;
+    this.scaleRadius = Math.min(width, height) / 2;
+    this.scaleDivisionAngle =
+      (this.scaleEndAngle - this.scaleStartAngle) / this.scaleDivisions;
 
-function drawScaleDivisionsAndLabels(
-  ctx: CanvasRenderingContext2D,
-  centerX: number,
-  centerY: number,
-  radius: number,
-  divisions: number,
-  divisionLength: number,
-  labelOffset: number,
-  divisionAngle: number
-) {
-  for (let i = 0; i <= divisions; i++) {
-    const angle = Math.PI / 4 + i * divisionAngle;
-    const [x1, y1] = pointOnCircle(centerX, centerY, radius, angle);
-    const [x2, y2] = pointOnCircle(
-      centerX,
-      centerY,
-      radius - divisionLength,
-      angle
-    );
-
-    ctx.beginPath();
-    ctx.moveTo(x1, y1);
-    ctx.lineTo(x2, y2);
-
-    ctx.lineWidth = window.devicePixelRatio * 2;
-    ctx.stroke();
-
-    const label = (i - 5).toString();
-    const [labelX, labelY] = pointOnCircle(
-      centerX,
-      centerY,
-      radius - labelOffset,
-      angle
-    );
-
-    ctx.fillStyle = "#000";
-    ctx.font = `bold ${12 * window.devicePixelRatio}px Arial`;
-
-    ctx.fillText(
-      label,
-      labelX - ctx.measureText(label).width / 2,
-      labelY + 6 * window.devicePixelRatio
-    ); // Adjusting for text alignment
+    this.staticContent = this.renderStaticContents();
   }
-}
 
-function drawNeedle(
-  ctx: CanvasRenderingContext2D,
-  centerX: number,
-  centerY: number,
-  radius: number,
-  lift: number,
-  startAngle: number,
-  endAngle: number,
-  divisionLength: number
-) {
-  const normalizedLift = (lift + 5) / 10;
-  const needleAngle = startAngle + normalizedLift * (endAngle - startAngle);
-  const [needleX, needleY] = pointOnCircle(
-    centerX,
-    centerY,
-    radius - divisionLength,
-    needleAngle
-  );
+  private renderStaticContents(): HTMLCanvasElement {
+    const offscreenCanvas = document.createElement("canvas");
+    offscreenCanvas.width = this.width;
+    offscreenCanvas.height = this.height;
+    const offscreenCtx = offscreenCanvas.getContext("2d", { alpha: false });
+    if (!offscreenCtx) throw new Error("Context doesn't exist");
 
-  ctx.beginPath();
-  ctx.moveTo(centerX, centerY);
-  ctx.lineTo(needleX, needleY);
-  ctx.lineWidth = window.devicePixelRatio * 2;
-  ctx.stroke();
-}
+    offscreenCtx.fillStyle = "#ffffff";
+    offscreenCtx.fillRect(0, 0, this.width, this.height);
+    this.drawScale(offscreenCtx);
+    this.drawScaleDivisionsAndLabels(offscreenCtx);
 
-function pointOnCircle(
-  cx: number,
-  cy: number,
-  r: number,
-  angle: number
-): [number, number] {
-  return [cx + r * Math.cos(angle), cy + r * Math.sin(angle)];
+    return offscreenCanvas;
+  }
+
+  public render(lift: number): void {
+    this.ctx.drawImage(
+      this.staticContent,
+      this.x,
+      this.y,
+      this.width,
+      this.height
+    );
+    this.drawNeedle(lift);
+  }
+
+  private drawScale(ctx: CanvasRenderingContext2D) {
+    ctx.strokeStyle = "#000000";
+    ctx.beginPath();
+    ctx.lineWidth = window.devicePixelRatio * 2;
+    ctx.arc(
+      this.centerX,
+      this.centerY,
+      this.scaleRadius - window.devicePixelRatio,
+      this.scaleStartAngle,
+      this.scaleEndAngle
+    );
+    ctx.stroke();
+  }
+
+  private drawScaleDivisionsAndLabels(ctx: CanvasRenderingContext2D) {
+    for (let i = 0; i <= this.scaleDivisions; i++) {
+      const angle = this.scaleStartAngle + i * this.scaleDivisionAngle;
+      const [x1, y1] = Renderer.pointOnCircle(
+        this.centerX,
+        this.centerY,
+        this.scaleRadius,
+        angle
+      );
+      const [x2, y2] = Renderer.pointOnCircle(
+        this.centerX,
+        this.centerY,
+        this.scaleRadius - this.divisionLength,
+        angle
+      );
+
+      ctx.beginPath();
+      ctx.moveTo(x1, y1);
+      ctx.lineTo(x2, y2);
+
+      ctx.lineWidth = window.devicePixelRatio * 2;
+      ctx.stroke();
+
+      const label = (i - 5).toString();
+      const [labelX, labelY] = Renderer.pointOnCircle(
+        this.centerX,
+        this.centerY,
+        this.scaleRadius - this.labelOffset,
+        angle
+      );
+
+      ctx.fillStyle = "#000";
+      ctx.font = `bold ${12 * window.devicePixelRatio}px Arial`;
+      ctx.fillText(
+        label,
+        labelX - ctx.measureText(label).width / 2,
+        labelY + 6 * window.devicePixelRatio
+      );
+    }
+  }
+
+  private drawNeedle(lift: number) {
+    const normalizedLift = (lift + 5) / 10;
+    const needleAngle =
+      this.scaleStartAngle +
+      normalizedLift * (this.scaleEndAngle - this.scaleStartAngle);
+    const [needleX, needleY] = Renderer.pointOnCircle(
+      this.centerX,
+      this.centerY,
+      this.scaleRadius - this.divisionLength,
+      needleAngle
+    );
+
+    this.ctx.strokeStyle = "#000000";
+    this.ctx.beginPath();
+    this.ctx.moveTo(this.x + this.centerX, this.y + this.centerY);
+    this.ctx.lineTo(this.x + needleX, this.y + needleY);
+    this.ctx.lineWidth = window.devicePixelRatio * 2;
+    this.ctx.stroke();
+  }
+
+  private static pointOnCircle(
+    cx: number,
+    cy: number,
+    r: number,
+    angle: number
+  ): [number, number] {
+    return [cx + r * Math.cos(angle), cy + r * Math.sin(angle)];
+  }
 }

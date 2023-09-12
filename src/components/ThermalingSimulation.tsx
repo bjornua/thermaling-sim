@@ -7,6 +7,7 @@ import { GliderController } from "../models/GliderController";
 import { Glider } from "../models/Glider";
 import { Simulation } from "../Simulation";
 import { Checkbox } from "@mantine/core";
+import { Renderer } from "../render/Renderer";
 
 type ThermalingSimulationProps = {
   x: number;
@@ -63,6 +64,7 @@ export const ThermalingSimulation = ({
     const ctx = canvasElement.getContext("2d", { alpha: false });
 
     if (!ctx) return;
+    let renderer = new Renderer(ctx, canvasElement.width, canvasElement.height);
 
     function start() {
       let prevTimeStamp: number = Date.now();
@@ -75,16 +77,12 @@ export const ThermalingSimulation = ({
         }
 
         const nextTimeStamp = Date.now();
-        const elapsedTime = Math.min(
-          (nextTimeStamp - prevTimeStamp) / 1000,
-          0.1
-        );
 
-        simulation.update(elapsedTime);
+        simulation.update((nextTimeStamp - prevTimeStamp) / 1000);
         prevTimeStamp = nextTimeStamp;
 
         if (isInView) {
-          simulation.draw(ctx, canvasElement.width, canvasElement.height);
+          renderer.draw(simulation);
         }
         requestAnimationFrame(loop);
       }
@@ -104,7 +102,7 @@ export const ThermalingSimulation = ({
         canvasElement.style.height = `${Math.floor(
           (200 / 600) * element.contentRect.width
         )}px`;
-
+        renderer = new Renderer(ctx, canvasElement.width, canvasElement.height);
         return;
       }
     });

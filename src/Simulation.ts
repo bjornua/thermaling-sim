@@ -1,8 +1,3 @@
-import renderAttitudeIndicator from "./render/ArtificialHorizon";
-import renderVarioMeter from "./render/Variometer";
-import renderOverheadView from "./render/OverheadView";
-import renderProgress from "./render/Progress";
-
 import { World } from "./models/World";
 
 export class Simulation {
@@ -12,11 +7,14 @@ export class Simulation {
   constructor(
     public world: World,
     public timeAcceleration: number,
-    public maxDuration: number | null = null
+    public maxDuration: number | null
   ) {}
 
-  update(clockElapsedTime: number) {
+  update(uncheckedClockElapsedTime: number) {
+    // step no longer than 100ms. Also mitigates when user tabs away from page
+    const clockElapsedTime = Math.min(0.1, uncheckedClockElapsedTime);
     const elapsedTime = this.timeAcceleration * clockElapsedTime;
+
     this.totalElapsed += elapsedTime;
 
     if (this.maxDuration !== null && this.totalElapsed > this.maxDuration) {
@@ -28,63 +26,5 @@ export class Simulation {
   reset() {
     this.totalElapsed = 0;
     this.world.reset();
-  }
-
-  draw(
-    ctx: CanvasRenderingContext2D,
-    canvasWidth: number,
-    canvasHeight: number
-  ) {
-    ctx.fillStyle = "#ffffff";
-    ctx.fillRect(0, 0, canvasWidth, canvasHeight);
-
-    canvasWidth = canvasWidth < 100 ? 100 : canvasWidth;
-    canvasHeight = canvasHeight < 100 ? 100 : canvasHeight;
-
-    const width = canvasWidth / 3;
-
-    renderAttitudeIndicator(
-      ctx,
-      width * 0 + 10,
-      10,
-      width - 20,
-      canvasHeight - 20,
-      this.world.glider.bankAngle
-    );
-    renderVarioMeter(
-      ctx,
-      width * 1 + 10,
-      10,
-      width - 20,
-      canvasHeight - 20,
-      this.world.glider.lift
-    );
-
-    if (this.shouldRenderOverheadView) {
-      renderOverheadView(
-        ctx,
-        width * 2 + 10,
-        10,
-        width - 20,
-        canvasHeight - 20,
-        0,
-        0,
-        600,
-        600,
-        this.world.thermal,
-        this.world.glider
-      );
-    }
-
-    if (this.maxDuration) {
-      renderProgress(
-        ctx,
-        0,
-        0,
-        canvasWidth,
-        1,
-        this.totalElapsed / this.maxDuration
-      );
-    }
   }
 }
