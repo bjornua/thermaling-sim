@@ -11,8 +11,6 @@
   },
   "dependencies": {
     "@mantine/core": "^6.0.20",
-    "just-memoize": "^2.2.0",
-    "just-memoize-last": "^3.2.0",
     "react": "^18.2.0",
     "react-dom": "^18.2.0"
   },
