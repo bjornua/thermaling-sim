@@ -157,6 +157,7 @@ export const ThermalingSimulation = ({
         ></canvas>
         <Checkbox
           mb="md"
+          mt="md"
           label="Reveal thermal?"
           checked={shouldRenderOverheadView}
           onChange={(e) => {

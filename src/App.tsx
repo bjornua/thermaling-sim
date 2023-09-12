@@ -80,8 +80,12 @@ export default function App() {
             and stronger the lift.
           </p>
           <p>
-            An initial idea is to make adjustments by tightening the turn by
-            increase the bank angle as the pilot notices the increase in lift.
+            An initial idea is to make adjustments by{" "}
+            <strong>tightening the turn</strong> by increase the bank angle as
+            the pilot notices the <strong>increase in lift.</strong>
+          </p>
+          <p>
+            Pay close attention to the timing of when the bank is increased.
           </p>
           <ThermalingSimulation
             controller={new AdaptiveBanking(60, 45, 45)}
@@ -90,14 +94,15 @@ export default function App() {
             y={200}
           />
           <p>
-            Notice how, counterintuitively, this strategy is actually a pretty
-            reliable way of exiting the thermal!
+            If you click "Reveal thermal?", you'll notice how,
+            counterintuitively, this strategy is actually a pretty reliable way
+            of exiting the thermal!
           </p>
           <h2 id="centering">Centering in a Thermal</h2>
           <p>
             A better technique is to tighten the turn when the variometer
-            indicates falling lift, as it suggests that the glider is nearing
-            the edge of the thermal.
+            indicates <strong>falling lift</strong>, as it suggests that the
+            glider is nearing the edge of the thermal.
           </p>
           <ThermalingSimulation
             controller={new AdaptiveBanking(45, 45, 60)}
