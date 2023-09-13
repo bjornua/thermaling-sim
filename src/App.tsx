@@ -183,16 +183,14 @@ export default function App() {
             alwaysRenderOverheadView={true}
           />
           <h3 id="vario-lag-2000">2000ms variometer lag</h3>
-          <p>
-            <ThermalingSimulation
-              controller={new AdaptiveBanking(30, 45, 60)}
-              duration={120}
-              x={0}
-              y={150}
-              variolag={2}
-              alwaysRenderOverheadView={true}
-            />
-          </p>
+          <ThermalingSimulation
+            controller={new AdaptiveBanking(30, 45, 60)}
+            duration={120}
+            x={0}
+            y={150}
+            variolag={2}
+            alwaysRenderOverheadView={true}
+          />
           <p>
             As demonstrated, variometer lag has significant impact on the
             ability to easily and efficiently center in thermals using the
@@ -238,6 +236,14 @@ export default function App() {
               https://github.com/bjornua/thermaling-sim
             </a>
           </p>
+          <h1>Further reading</h1>
+          <ul>
+            <li>
+              <a href="https://members.gliding.co.uk/wp-content/uploads/sites/3/2017/08/6-24-THERMALLING-2017.pdf">
+                https://members.gliding.co.uk/wp-content/uploads/sites/3/2017/08/6-24-THERMALLING-2017.pdf
+              </a>
+            </li>
+          </ul>
         </Container>
       </MantineProvider>
     </TypographyStylesProvider>

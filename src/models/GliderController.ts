@@ -20,7 +20,7 @@ export class AdaptiveBanking implements GliderController {
   }
 
   private updateState(variometer: Variometer): void {
-    const liftChangeOverTime = variometer.getLiftChangeOverTime(1); // 1 second for example
+    const liftChangeOverTime = variometer.getLiftChangeOverTime(1);
 
     if (liftChangeOverTime > 0.05) {
       this.activeState = "increase";

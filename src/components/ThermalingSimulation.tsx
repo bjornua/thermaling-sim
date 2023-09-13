@@ -6,7 +6,7 @@ import { Thermal } from "../models/Thermal";
 import { GliderController } from "../models/GliderController";
 import { Glider } from "../models/Glider";
 import { Simulation } from "../Simulation";
-import { Checkbox } from "@mantine/core";
+import { Checkbox, Container } from "@mantine/core";
 import { Renderer } from "../render/Renderer";
 
 type ThermalingSimulationProps = {
@@ -133,7 +133,7 @@ export const ThermalingSimulation = ({
   }, [simulation]);
 
   return (
-    <div>
+    <Container fluid mb="md" mt="md">
       {/* <Container fluid style={{ flexGrow: 1 }}>
         <Text size="sm">Simulation Speed</Text>
         <Slider
@@ -172,6 +172,6 @@ export const ThermalingSimulation = ({
           />
         )}
       </div>
-    </div>
+    </Container>
   );
 };

@@ -1,40 +1,70 @@
+/**
+ * Linearly interpolates between two values.
+ *
+ * @param a - The starting value.
+ * @param b - The ending value.
+ * @param t - The interpolation factor. (0 <= t <= 1)
+ */
+function lerp(a: number, b: number, t: number): number {
+  return a + t * (b - a);
+}
+
+class CircularBuffer<T> {
+  private buffer: (null | T)[] = [];
+  private currentIndex: number = 0;
+
+  constructor(size: number) {
+    this.buffer = new Array(size).fill(null);
+  }
+
+  advance(): void {
+    this.currentIndex = (this.currentIndex + 1) % this.buffer.length;
+  }
+
+  set(value: T): void {
+    this.buffer[this.currentIndex] = value;
+  }
+
+  add(value: T): void {
+    this.set(value);
+    this.advance();
+  }
+
+  getRelative(index: number): T | null {
+    const actualIndex =
+      (this.currentIndex + index + this.buffer.length) % this.buffer.length;
+    return this.buffer[actualIndex];
+  }
+}
+
 export default class Variometer {
-  private buffer: { cumulativeTime: number; lift: number }[] = [];
-  private readonly interval: number = 0 / 0.05;
+  private readonly bufferSize: number = 200;
+  private buffer = new CircularBuffer<{
+    cumulativeTime: number;
+    lift: number;
+  }>(this.bufferSize);
   private cumulativeTime: number = 0;
-  private lastRecordedTime: number = 0;
 
   constructor(public variolag: number) {}
 
+  public reset(): void {
+    this.cumulativeTime = 0;
+    this.buffer = new CircularBuffer(this.bufferSize);
+  }
+
   addLiftValue(lift: number, elapsedTime: number): void {
     this.cumulativeTime += elapsedTime;
+    this.buffer.set({ cumulativeTime: this.cumulativeTime, lift });
 
-    if (this.cumulativeTime - this.lastRecordedTime >= this.interval) {
-      this.buffer.push({ cumulativeTime: this.cumulativeTime, lift });
-      this.lastRecordedTime = this.cumulativeTime;
-    }
-
-    const oldestRelevantTime = this.cumulativeTime - 10;
-    while (
-      this.buffer.length > 0 &&
-      this.buffer[0].cumulativeTime < oldestRelevantTime
-    ) {
-      this.buffer.shift();
+    const last = this.buffer.getRelative(-1);
+    if (last === null || last.cumulativeTime + 0.1 < this.cumulativeTime) {
+      this.buffer.advance();
     }
   }
 
   getLiftChangeOverTime(duration: number): number {
-    if (this.buffer.length === 0) {
-      return 0;
-    }
-
-    // Find the start time for the duration we want to measure
     const startTime = this.cumulativeTime - duration - this.variolag;
-
-    // Get the value of lift at the start of the duration using the variolag
     const initialLiftValue = this.getLiftValueAtTime(startTime);
-
-    // Get the value of lift at the end of the duration using the variolag
     const endLiftValue = this.getLiftValueWithDelay();
 
     return endLiftValue - initialLiftValue;
@@ -45,61 +75,31 @@ export default class Variometer {
     return this.getLiftValueAtTime(targetTime);
   }
 
-  // This helper function gets the lift value at a specific time considering lerp
   private getLiftValueAtTime(targetTime: number): number {
-    // If the buffer is empty or the oldest data in the buffer is newer than the target time, return 0.
-    if (
-      this.buffer.length === 0 ||
-      this.buffer[0].cumulativeTime > targetTime
-    ) {
-      return 0;
-    }
+    let current: { cumulativeTime: number; lift: number } | null = null;
+    let next: { cumulativeTime: number; lift: number } | null = null;
+    for (let i = 0; i > -this.bufferSize; i--) {
+      current = this.buffer.getRelative(i);
+      next = this.buffer.getRelative(i - 1);
 
-    let indexBeforeTarget: number | null = null;
-    let indexAfterTarget: number | null = null;
+      if (!current || !next) continue;
 
-    // Search for the indices just before and after the target time
-    for (let i = this.buffer.length - 1; i >= 0; i--) {
-      if (this.buffer[i].cumulativeTime <= targetTime) {
-        indexBeforeTarget = i;
-        indexAfterTarget = i + 1;
-        break;
+      if (current.cumulativeTime >= targetTime) {
+        return current.lift;
+      }
+
+      if (
+        next.cumulativeTime <= targetTime &&
+        current.cumulativeTime > targetTime
+      ) {
+        const weight =
+          (targetTime - next.cumulativeTime) /
+          (current.cumulativeTime - next.cumulativeTime);
+
+        return lerp(next.lift, current.lift, weight);
       }
     }
 
-    // If we have only one value in the buffer, return it
-    if (this.buffer.length === 1) {
-      return this.buffer[0].lift;
-    }
-
-    // If target time is earlier than the first value in the buffer
-    if (indexAfterTarget === null) {
-      return this.buffer[0].lift;
-    }
-
-    // If indexBeforeTarget is null, then there's a logic flaw. Return a default value.
-    if (indexBeforeTarget === null) {
-      return 0;
-    }
-
-    // If indexBeforeTarget points to the last index or indexAfterTarget is out of bounds
-    if (
-      indexBeforeTarget === this.buffer.length - 1 ||
-      indexAfterTarget >= this.buffer.length
-    ) {
-      return this.buffer[indexBeforeTarget].lift;
-    }
-
-    // Linear interpolation (lerp)
-    const weight =
-      (targetTime - this.buffer[indexBeforeTarget].cumulativeTime) /
-      (this.buffer[indexAfterTarget].cumulativeTime -
-        this.buffer[indexBeforeTarget].cumulativeTime);
-    return (
-      this.buffer[indexBeforeTarget].lift +
-      weight *
-        (this.buffer[indexAfterTarget].lift -
-          this.buffer[indexBeforeTarget].lift)
-    );
+    return 0;
   }
 }

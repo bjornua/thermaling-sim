@@ -45,6 +45,7 @@ export class Glider {
     this.totalElapsedTime = 0;
     this.headingAngle = 0;
     this.lastTraceUpdateTime = 0;
+    this.variometer.reset();
   }
 
   update(lift: number, elapsedTime: number): void {
