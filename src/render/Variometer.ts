@@ -9,11 +9,13 @@ export default class Renderer {
   private scaleStartAngle = Math.PI / 4;
   private scaleEndAngle = (7 * Math.PI) / 4;
   private scaleDivisions = 10;
-  private divisionLength = this.ctx.scalePixel(10);
-  private labelOffset = this.ctx.scalePixel(20);
   private scaleDivisionAngle: number;
+  private divisionLength: number;
+  private labelOffset: number;
 
   constructor(public ctx: BoundedRenderingContext) {
+    this.divisionLength = this.ctx.scalePixel(10);
+    this.labelOffset = this.ctx.scalePixel(20);
     this.centerX = this.ctx.width / 2;
     this.centerY = this.ctx.height / 2;
     this.scaleRadius = Math.min(this.ctx.width, this.ctx.height) / 2;
