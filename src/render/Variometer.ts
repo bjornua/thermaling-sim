@@ -1,9 +1,6 @@
+import { BoundedRenderingContext } from "./util";
+
 export default class Renderer {
-  private ctx: CanvasRenderingContext2D;
-  private x: number;
-  private y: number;
-  private width: number;
-  private height: number;
   private staticContent: HTMLCanvasElement;
 
   private centerX: number;
@@ -12,26 +9,14 @@ export default class Renderer {
   private scaleStartAngle = Math.PI / 4;
   private scaleEndAngle = (7 * Math.PI) / 4;
   private scaleDivisions = 10;
-  private divisionLength = 10 * window.devicePixelRatio;
-  private labelOffset = 20 * window.devicePixelRatio;
+  private divisionLength = this.ctx.scalePixel(10);
+  private labelOffset = this.ctx.scalePixel(20);
   private scaleDivisionAngle: number;
 
-  constructor(
-    ctx: CanvasRenderingContext2D,
-    x: number,
-    y: number,
-    width: number,
-    height: number
-  ) {
-    this.ctx = ctx;
-    this.x = x;
-    this.y = y;
-    this.width = width;
-    this.height = height;
-
-    this.centerX = width / 2;
-    this.centerY = height / 2;
-    this.scaleRadius = Math.min(width, height) / 2;
+  constructor(public ctx: BoundedRenderingContext) {
+    this.centerX = this.ctx.width / 2;
+    this.centerY = this.ctx.height / 2;
+    this.scaleRadius = Math.min(this.ctx.width, this.ctx.height) / 2;
     this.scaleDivisionAngle =
       (this.scaleEndAngle - this.scaleStartAngle) / this.scaleDivisions;
 
@@ -40,13 +25,13 @@ export default class Renderer {
 
   private renderStaticContents(): HTMLCanvasElement {
     const offscreenCanvas = document.createElement("canvas");
-    offscreenCanvas.width = this.width;
-    offscreenCanvas.height = this.height;
+    offscreenCanvas.width = this.ctx.width;
+    offscreenCanvas.height = this.ctx.height;
     const offscreenCtx = offscreenCanvas.getContext("2d", { alpha: false });
     if (!offscreenCtx) throw new Error("Context doesn't exist");
 
     offscreenCtx.fillStyle = "#ffffff";
-    offscreenCtx.fillRect(0, 0, this.width, this.height);
+    offscreenCtx.fillRect(0, 0, this.ctx.width, this.ctx.height);
     this.drawScale(offscreenCtx);
     this.drawScaleDivisionsAndLabels(offscreenCtx);
 
@@ -54,12 +39,12 @@ export default class Renderer {
   }
 
   public render(lift: number): void {
-    this.ctx.drawImage(
+    this.ctx.ctx.drawImage(
       this.staticContent,
-      this.x,
-      this.y,
-      this.width,
-      this.height
+      this.ctx.x,
+      this.ctx.y,
+      this.ctx.width,
+      this.ctx.height
     );
     this.drawNeedle(lift);
   }
@@ -67,11 +52,11 @@ export default class Renderer {
   private drawScale(ctx: CanvasRenderingContext2D) {
     ctx.strokeStyle = "#000000";
     ctx.beginPath();
-    ctx.lineWidth = window.devicePixelRatio * 2;
+    ctx.lineWidth = this.ctx.scalePixel(2);
     ctx.arc(
       this.centerX,
       this.centerY,
-      this.scaleRadius - window.devicePixelRatio,
+      this.scaleRadius - this.ctx.scalePixel(1),
       this.scaleStartAngle,
       this.scaleEndAngle
     );
@@ -98,7 +83,7 @@ export default class Renderer {
       ctx.moveTo(x1, y1);
       ctx.lineTo(x2, y2);
 
-      ctx.lineWidth = window.devicePixelRatio * 2;
+      ctx.lineWidth = this.ctx.scalePixel(2);
       ctx.stroke();
 
       const label = (i - 5).toString();
@@ -110,11 +95,11 @@ export default class Renderer {
       );
 
       ctx.fillStyle = "#000";
-      ctx.font = `bold ${12 * window.devicePixelRatio}px Arial`;
+      ctx.font = `bold ${this.ctx.scalePixel(12)}px Arial`;
       ctx.fillText(
         label,
         labelX - ctx.measureText(label).width / 2,
-        labelY + 6 * window.devicePixelRatio
+        labelY + this.ctx.scalePixel(6)
       );
     }
   }
@@ -131,12 +116,12 @@ export default class Renderer {
       needleAngle
     );
 
-    this.ctx.strokeStyle = "#000000";
-    this.ctx.beginPath();
-    this.ctx.moveTo(this.x + this.centerX, this.y + this.centerY);
-    this.ctx.lineTo(this.x + needleX, this.y + needleY);
-    this.ctx.lineWidth = window.devicePixelRatio * 2;
-    this.ctx.stroke();
+    this.ctx.ctx.strokeStyle = "#000000";
+    this.ctx.ctx.beginPath();
+    this.ctx.ctx.moveTo(this.ctx.x + this.centerX, this.ctx.y + this.centerY);
+    this.ctx.ctx.lineTo(this.ctx.x + needleX, this.ctx.y + needleY);
+    this.ctx.ctx.lineWidth = this.ctx.scalePixel(2);
+    this.ctx.ctx.stroke();
   }
 
   private static pointOnCircle(

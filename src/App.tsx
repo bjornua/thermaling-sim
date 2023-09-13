@@ -35,8 +35,10 @@ export default function App() {
             aviators. Thermals, columns of rising air, are invisible, often
             requiring pilots to rely on indirect cues and sophisticated
             strategies to harness their lift. This webpage presents a guided
-            walkthrough of strategies.
+            walkthrough of strategies. The animations are real simulations based
+            on a simple thermal and gliding model.
           </p>
+
           <h2 id="basic-awareness">Basic Awareness</h2>
           <p>
             At its most fundamental level, thermal soaring involves recognizing

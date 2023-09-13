@@ -61,17 +61,15 @@ export const ThermalingSimulation = ({
 
     const canvasElement = canvasRef.current;
     if (!canvasElement) return;
-    const ctx = canvasElement.getContext("2d", { alpha: false });
 
-    if (!ctx) return;
-    let renderer = new Renderer(ctx, canvasElement.width, canvasElement.height);
+    let renderer = new Renderer(canvasElement, window.devicePixelRatio);
 
     function start() {
       let prevTimeStamp: number = Date.now();
       stopped = false;
 
       function loop() {
-        if (stop || !isInView || !ctx || !canvasElement) {
+        if (stop || !isInView || !canvasElement) {
           stopped = true;
           return;
         }
@@ -92,17 +90,18 @@ export const ThermalingSimulation = ({
 
     const observer = new ResizeObserver((elements) => {
       for (const element of elements) {
+        const pixelRatio = window.devicePixelRatio;
         canvasElement.width = Math.floor(
-          element.contentRect.width * window.devicePixelRatio
+          element.contentRect.width * pixelRatio
         );
         canvasElement.height = Math.floor(
-          (200 / 600) * element.contentRect.width * devicePixelRatio
+          (200 / 600) * element.contentRect.width * pixelRatio
         );
 
         canvasElement.style.height = `${Math.floor(
           (200 / 600) * element.contentRect.width
         )}px`;
-        renderer = new Renderer(ctx, canvasElement.width, canvasElement.height);
+        renderer = new Renderer(canvasElement, window.devicePixelRatio);
         return;
       }
     });
