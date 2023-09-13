@@ -4,7 +4,11 @@ function parseDimension(value: number | null, maxValue: number) {
   }
 
   if (value < 0) {
-    return maxValue - value;
+    const result = maxValue - value;
+    if (result < 0) {
+      throw new Error(`Out of bounds. maxValue=${maxValue} value=${value}`);
+    }
+    return result;
   }
 
   if (value > maxValue && value < 0) {

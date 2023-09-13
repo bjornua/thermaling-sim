@@ -83,7 +83,7 @@ export default class Renderer {
 
     // Draw the lift value
     this.ctx.ctx.fillText(
-      `Lift: ${glider.lift.toFixed(2)} m/s`,
+      `Lift: ${glider.variometer.getLiftValueWithDelay().toFixed(2)} m/s`,
       pixelX + this.ctx.scalePixel(15),
       pixelY + this.ctx.scalePixel(6)
     );

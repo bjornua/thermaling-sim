@@ -14,6 +14,8 @@ type ThermalingSimulationProps = {
   y: number;
   controller: GliderController;
   duration: number;
+  variolag: number;
+  alwaysRenderOverheadView: boolean;
 };
 
 function makeSimulation(
@@ -21,7 +23,8 @@ function makeSimulation(
   y: number,
   controller: GliderController,
   timeAcceleration: number,
-  duration: number
+  duration: number,
+  variolag: number
 ): Simulation {
   const thermal = new Thermal(300, 300, 5, 250);
 
@@ -29,7 +32,7 @@ function makeSimulation(
     600,
     800,
     thermal,
-    new Glider(x, y, "#00F", controller)
+    new Glider(x, y, "#00F", variolag, controller)
   );
 
   const simulation = new Simulation(world, timeAcceleration, duration);
@@ -42,6 +45,8 @@ export const ThermalingSimulation = ({
   y,
   controller,
   duration,
+  variolag,
+  alwaysRenderOverheadView,
 }: ThermalingSimulationProps) => {
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const speed = 2;
@@ -49,10 +54,11 @@ export const ThermalingSimulation = ({
     useState(false);
 
   const simulation = useMemo(() => {
-    return makeSimulation(x, y, controller, speed, duration);
-  }, [controller, duration, x, y]);
+    return makeSimulation(x, y, controller, speed, duration, variolag);
+  }, [controller, duration, variolag, x, y]);
 
-  simulation.shouldRenderOverheadView = shouldRenderOverheadView;
+  simulation.shouldRenderOverheadView =
+    shouldRenderOverheadView || alwaysRenderOverheadView;
 
   useEffect(() => {
     let stop = false;
@@ -154,15 +160,17 @@ export const ThermalingSimulation = ({
           ref={canvasRef}
           style={{ display: "block", width: "100%" }}
         ></canvas>
-        <Checkbox
-          mb="md"
-          mt="md"
-          label="Reveal thermal?"
-          checked={shouldRenderOverheadView}
-          onChange={(e) => {
-            setShouldRenderOverheadView(e.target.checked);
-          }}
-        ></Checkbox>
+        {alwaysRenderOverheadView ? null : (
+          <Checkbox
+            mb="md"
+            mt="md"
+            label="Reveal thermal?"
+            checked={shouldRenderOverheadView}
+            onChange={(e) => {
+              setShouldRenderOverheadView(e.target.checked);
+            }}
+          />
+        )}
       </div>
     </div>
   );

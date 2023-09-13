@@ -117,12 +117,6 @@ class AttitudeIndicator {
       throw new Error("Context doesn't exist");
     }
 
-    console.log({
-      offscreenCtx,
-      centerX: this.centerX,
-      centerY: this.centerY,
-      radius: this.radius,
-    });
     this.drawOuterCircle(offscreenCtx, this.centerX, this.centerY, this.radius);
 
     this.drawTrianglePointer(offscreenCtx, this.centerX, this.radius * 0.1);

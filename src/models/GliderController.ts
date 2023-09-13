@@ -1,12 +1,12 @@
+import Variometer from "./Variometer";
+
 export interface GliderController {
   reset(): void;
-  update(lift: number, elapsedTime: number): number;
+  update(variometer: Variometer): number;
 }
 
 type AdaptiveBankingState = "increase" | "neutral" | "decrease";
-
 export class AdaptiveBanking implements GliderController {
-  public previousLift = 0;
   public activeState: AdaptiveBankingState = "neutral";
 
   constructor(
@@ -16,30 +16,23 @@ export class AdaptiveBanking implements GliderController {
   ) {}
 
   reset() {
-    this.previousLift = 0;
     this.activeState = "neutral";
   }
 
-  private updateState(lift: number, elapsedTime: number): void {
-    if (elapsedTime === 0) {
-      this.activeState = "neutral";
-      return;
-    }
+  private updateState(variometer: Variometer): void {
+    const liftChangeOverTime = variometer.getLiftChangeOverTime(1); // 1 second for example
 
-    const liftChangeRate = (lift - this.previousLift) / elapsedTime;
-
-    if (liftChangeRate > 0.05) {
+    if (liftChangeOverTime > 0.05) {
       this.activeState = "increase";
-    } else if (liftChangeRate < -0.05) {
+    } else if (liftChangeOverTime < -0.05) {
       this.activeState = "decrease";
     } else {
       this.activeState = "neutral";
     }
   }
 
-  update(lift: number, elapsedTime: number): number {
-    this.updateState(lift, elapsedTime);
-    this.previousLift = lift;
+  update(variometer: Variometer): number {
+    this.updateState(variometer);
 
     switch (this.activeState) {
       case "increase":

@@ -34,11 +34,11 @@ export default function App() {
             Thermal soaring presents a fascinating yet challenging paradigm for
             aviators. Thermals, columns of rising air, are invisible, often
             requiring pilots to rely on indirect cues and sophisticated
-            strategies to harness their lift. This webpage presents a guided
-            walkthrough of strategies. The animations are real simulations based
-            on a simple thermal and gliding model.
+            strategies to harness their lift. This webpage presents an attempt
+            of demystifying the dynamics at play and centering strategies. The
+            animations are live simulations based on a simple thermal and
+            gliding model.
           </p>
-
           <h2 id="basic-awareness">Basic Awareness</h2>
           <p>
             At its most fundamental level, thermal soaring involves recognizing
@@ -49,6 +49,8 @@ export default function App() {
             duration={25}
             x={0}
             y={150}
+            variolag={0}
+            alwaysRenderOverheadView={false}
           />
           <p>
             Notice how as the glider passes through the thermal, the variometer
@@ -67,6 +69,8 @@ export default function App() {
             duration={60}
             x={150}
             y={150}
+            variolag={0}
+            alwaysRenderOverheadView={false}
           />
           <p>
             The animation illustrates the immediate turn upon entering the
@@ -94,6 +98,8 @@ export default function App() {
             duration={40}
             x={200}
             y={200}
+            variolag={0}
+            alwaysRenderOverheadView={false}
           />
           <p>
             If you click "Reveal thermal?", you'll notice how,
@@ -111,6 +117,8 @@ export default function App() {
             duration={80}
             x={0}
             y={150}
+            variolag={0}
+            alwaysRenderOverheadView={false}
           />
           <p>
             The animation shows the glider adjusting its path based on the
@@ -132,6 +140,8 @@ export default function App() {
             duration={80}
             x={0}
             y={150}
+            variolag={0}
+            alwaysRenderOverheadView={false}
           />
           <p>
             The animation portrays this dynamic adjustment, demonstrating how a
@@ -139,7 +149,71 @@ export default function App() {
             effectively widening and tightening its turns based on the lift
             experienced.
           </p>
-
+          <h2 id="vario-lag">Variometer Lag</h2>
+          <p>
+            Variometer lag refers to the delay between an actual change in
+            vertical speed and the moment the variometer displays this change.
+            This lag can arise due to inherent mechanical or electronic delays
+            in the device or designed response times to filter out short-term
+            fluctuations. In essence, variometer lag means that the readings
+            reflect past changes in altitude, not immediate ones, potentially
+            affecting a pilot's real-time decisions based on the instrument's
+            output.
+          </p>
+          <p>
+            The following simulations shows the widening and tightening
+            technique, but introduces various amounts of lag.
+          </p>
+          <h3 id="vario-lag-none">0ms variometer lag</h3>
+          <ThermalingSimulation
+            controller={new AdaptiveBanking(30, 45, 60)}
+            duration={120}
+            x={0}
+            y={150}
+            variolag={0.5}
+            alwaysRenderOverheadView={true}
+          />
+          <h3 id="vario-lag-500">500ms variometer lag</h3>
+          <ThermalingSimulation
+            controller={new AdaptiveBanking(30, 45, 60)}
+            duration={120}
+            x={0}
+            y={150}
+            variolag={0.5}
+            alwaysRenderOverheadView={true}
+          />
+          <h3 id="vario-lag-2000">2000ms variometer lag</h3>
+          <p>
+            <ThermalingSimulation
+              controller={new AdaptiveBanking(30, 45, 60)}
+              duration={120}
+              x={0}
+              y={150}
+              variolag={2}
+              alwaysRenderOverheadView={true}
+            />
+          </p>
+          <p>
+            As demonstrated, variometer lag has significant impact on the
+            ability to easily and efficiently center in thermals using the
+            variometer alone.
+          </p>
+          <h1>Using The Heading</h1>
+          <p>
+            While it would be ideal to eliminate variometer lag, this is not
+            always possible. With a variometer lag of 2 seconds, our current
+            reading corresponds to the glider's lift from 2 seconds prior. By
+            understanding how this relates to our turning behavior, we can
+            predict our position. Specifically, if we maintain a constant bank
+            angle, we'll return to the same position after completing a 360°
+            turn. At a speed of 90 km/h and a bank angle of 45°, the glider will
+            have completed 315° of the turn by the time our variometer reflects
+            the lift from our current position. In other words, after traveling
+            315°, we will arrive at the spot that our variometer is currently
+            indicating.
+          </p>
+          <h3>On rising lift, hold bank for 315° and widen turn for 180°</h3>
+          <p>[simulation missing...]</p>
           <h2 id="caveats">Caveats and Considerations</h2>
           <p>
             The simulation is designed to provide a basic introduction to the
@@ -153,11 +227,6 @@ export default function App() {
             respond to various disturbances that aren't necessarily thermals.
             Therefore, it's a good idea to exercise patience and consider moving
             on if you don't experience any lift.
-          </p>
-          <p>
-            Moreover, while the variometer in the simulation reacts instantly,
-            real-world variometers may have a lag of several seconds, adding
-            another dimension of complexity.
           </p>
           <p>
             Overall, while theories and simulations are informative, there's no

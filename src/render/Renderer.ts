@@ -9,9 +9,6 @@ export class Renderer {
   private ctx: BoundedRenderingContext;
   private instrumentsCtx: BoundedRenderingContext;
 
-  private gridWidth: number;
-  private instrumentPadding: number;
-  private progressBarHeight: number;
   private attitudeIndicator: AttitudeIndicator;
   private overheadview: OverheadView;
   private variometer: Variometer;
@@ -30,19 +27,19 @@ export class Renderer {
       canvas.height < 100 ? 100 : canvas.height
     );
 
-    this.gridWidth = Math.floor(this.ctx.width / 3);
+    const gridWidth = Math.floor(this.ctx.width / 3);
 
-    this.instrumentPadding = 10;
-    this.progressBarHeight = this.ctx.scalePixel(3);
+    const instrumentPadding = 10;
+    const progressBarHeight = this.ctx.scalePixel(3);
 
     this.instrumentsCtx = this.ctx.createNew(
       0,
       0,
-      this.gridWidth * 3,
-      -this.instrumentPadding * 2 - this.progressBarHeight
+      gridWidth * 3,
+      -instrumentPadding * 2 - progressBarHeight
     );
 
-    const instrumentWidth = this.gridWidth - this.instrumentPadding * 2;
+    const instrumentWidth = gridWidth - instrumentPadding * 2;
 
     this.attitudeIndicator = new AttitudeIndicator(
       this.instrumentsCtx.createNew(0, 0, instrumentWidth, null)
@@ -50,7 +47,7 @@ export class Renderer {
 
     this.variometer = new Variometer(
       this.instrumentsCtx.createNew(
-        this.gridWidth * 1 + this.instrumentPadding,
+        gridWidth + instrumentPadding,
         0,
         instrumentWidth,
         null
@@ -59,7 +56,7 @@ export class Renderer {
 
     this.overheadview = new OverheadView(
       this.instrumentsCtx.createNew(
-        this.gridWidth * 2 + this.instrumentPadding,
+        gridWidth * 2 + instrumentPadding,
         0,
         instrumentWidth,
         null
@@ -77,7 +74,7 @@ export class Renderer {
 
     this.ctx.clear();
     this.attitudeIndicator.render(world.glider.bankAngle);
-    this.variometer.render(world.glider.lift);
+    this.variometer.render(world.glider.variometer.getLiftValueWithDelay());
 
     if (shouldRenderOverheadView) {
       this.overheadview.render(world.thermal, world.glider);
