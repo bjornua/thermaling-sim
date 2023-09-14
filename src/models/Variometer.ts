@@ -84,13 +84,9 @@ export default class Variometer {
 
       if (!current || !next) continue;
 
-      if (current.cumulativeTime >= targetTime) {
-        return current.lift;
-      }
-
       if (
         next.cumulativeTime <= targetTime &&
-        current.cumulativeTime > targetTime
+        current.cumulativeTime >= targetTime
       ) {
         const weight =
           (targetTime - next.cumulativeTime) /
