@@ -1,4 +1,4 @@
-import { BoundedRenderingContext } from "./util";
+import { BoundedContext } from "./util";
 
 export default class Renderer {
   private staticContent: HTMLCanvasElement;
@@ -13,12 +13,12 @@ export default class Renderer {
   private divisionLength: number;
   private labelOffset: number;
 
-  constructor(public ctx: BoundedRenderingContext) {
+  constructor(public ctx: BoundedContext) {
     this.divisionLength = this.ctx.scalePixel(10);
     this.labelOffset = this.ctx.scalePixel(20);
-    this.centerX = this.ctx.width / 2;
-    this.centerY = this.ctx.height / 2;
-    this.scaleRadius = Math.min(this.ctx.width, this.ctx.height) / 2;
+    this.centerX = this.ctx.rect.width / 2;
+    this.centerY = this.ctx.rect.height / 2;
+    this.scaleRadius = Math.min(this.ctx.rect.width, this.ctx.rect.height) / 2;
     this.scaleDivisionAngle =
       (this.scaleEndAngle - this.scaleStartAngle) / this.scaleDivisions;
 
@@ -27,13 +27,13 @@ export default class Renderer {
 
   private renderStaticContents(): HTMLCanvasElement {
     const offscreenCanvas = document.createElement("canvas");
-    offscreenCanvas.width = this.ctx.width;
-    offscreenCanvas.height = this.ctx.height;
+    offscreenCanvas.width = this.ctx.rect.width;
+    offscreenCanvas.height = this.ctx.rect.height;
     const offscreenCtx = offscreenCanvas.getContext("2d", { alpha: false });
     if (!offscreenCtx) throw new Error("Context doesn't exist");
 
     offscreenCtx.fillStyle = "#ffffff";
-    offscreenCtx.fillRect(0, 0, this.ctx.width, this.ctx.height);
+    offscreenCtx.fillRect(0, 0, this.ctx.rect.width, this.ctx.rect.height);
     this.drawScale(offscreenCtx);
     this.drawScaleDivisionsAndLabels(offscreenCtx);
 
@@ -43,10 +43,10 @@ export default class Renderer {
   public render(lift: number): void {
     this.ctx.ctx.drawImage(
       this.staticContent,
-      this.ctx.x,
-      this.ctx.y,
-      this.ctx.width,
-      this.ctx.height
+      this.ctx.rect.left,
+      this.ctx.rect.top,
+      this.ctx.rect.width,
+      this.ctx.rect.height
     );
     this.drawNeedle(lift);
   }
@@ -120,8 +120,14 @@ export default class Renderer {
 
     this.ctx.ctx.strokeStyle = "#000000";
     this.ctx.ctx.beginPath();
-    this.ctx.ctx.moveTo(this.ctx.x + this.centerX, this.ctx.y + this.centerY);
-    this.ctx.ctx.lineTo(this.ctx.x + needleX, this.ctx.y + needleY);
+    this.ctx.ctx.moveTo(
+      this.ctx.rect.left + this.centerX,
+      this.ctx.rect.top + this.centerY
+    );
+    this.ctx.ctx.lineTo(
+      this.ctx.rect.left + needleX,
+      this.ctx.rect.top + needleY
+    );
     this.ctx.ctx.lineWidth = this.ctx.scalePixel(2);
     this.ctx.ctx.stroke();
   }

@@ -3,68 +3,78 @@ import OverheadView from "./OverheadView";
 import renderProgress from "./Progress";
 import AttitudeIndicator from "./ArtificialHorizon";
 import { Simulation } from "../Simulation";
-import { BoundedRenderingContext } from "./util";
+import { BoundedContext, Rectangle } from "./util";
+import ProgressRenderer from "./Progress";
 
 export class Renderer {
-  private ctx: BoundedRenderingContext;
-  private instrumentsCtx: BoundedRenderingContext;
+  private ctx: BoundedContext;
+  private instrumentsCtx: BoundedContext;
 
   private attitudeIndicator: AttitudeIndicator;
   private overheadview: OverheadView;
   private variometer: Variometer;
+  progressRenderer: renderProgress;
 
   constructor(canvas: HTMLCanvasElement, pixelRatio: number) {
     const ctx = canvas.getContext("2d", { alpha: false });
     if (!ctx) throw new Error("Context doesn't exist");
 
-    this.ctx = new BoundedRenderingContext(
+    this.ctx = new BoundedContext(
       canvas,
       ctx,
       pixelRatio,
-      0,
-      0,
-      canvas.width < 100 ? 100 : canvas.width,
-      canvas.height < 100 ? 100 : canvas.height
+      new Rectangle(
+        0,
+        0,
+        canvas.width < 100 ? 100 : canvas.width,
+        canvas.height < 100 ? 100 : canvas.height
+      )
     );
 
-    const gridWidth = Math.floor(this.ctx.width / 3);
+    const gridWidth = Math.floor(this.ctx.rect.width / 3);
 
     const instrumentPadding = 10;
     const progressBarHeight = this.ctx.scalePixel(3);
 
-    this.instrumentsCtx = this.ctx.createNew(
-      0,
-      0,
-      gridWidth * 3,
-      -instrumentPadding * 2 - progressBarHeight
-    );
+    this.instrumentsCtx = this.ctx.getSubContext({
+      left: 0,
+      top: 0,
+      width: gridWidth * 3,
+      bottom: -instrumentPadding * 2 - progressBarHeight,
+    });
 
     const instrumentWidth = gridWidth - instrumentPadding * 2;
 
     this.attitudeIndicator = new AttitudeIndicator(
-      this.instrumentsCtx.createNew(0, 0, instrumentWidth, null)
+      this.instrumentsCtx.getSubContext({
+        left: 0,
+        top: 0,
+        width: instrumentWidth,
+        bottom: -1,
+      })
     );
 
     this.variometer = new Variometer(
-      this.instrumentsCtx.createNew(
-        gridWidth + instrumentPadding,
-        0,
-        instrumentWidth,
-        null
-      )
+      this.instrumentsCtx.getSubContext({
+        left: gridWidth + instrumentPadding,
+        width: instrumentWidth,
+        top: 0,
+        bottom: 0,
+      })
     );
 
     this.overheadview = new OverheadView(
-      this.instrumentsCtx.createNew(
-        gridWidth * 2 + instrumentPadding,
-        0,
-        instrumentWidth,
-        null
-      ),
-      0,
-      0,
-      600,
-      600
+      this.instrumentsCtx.getSubContext({
+        top: 0,
+        left: gridWidth * 2 + instrumentPadding,
+        width: instrumentWidth,
+        bottom: 0,
+      }),
+      new Rectangle(0, 0, 600, 600)
+    );
+
+    this.progressRenderer = new ProgressRenderer(
+      this.ctx.getSubContext({ top: -3, bottom: 0, right: 0, left: 0 })
     );
   }
 
@@ -81,14 +91,7 @@ export class Renderer {
     }
 
     if (maxDuration) {
-      renderProgress(
-        this.ctx.ctx,
-        0,
-        this.ctx.height - this.ctx.scalePixel(3),
-        this.ctx.width,
-        this.ctx.scalePixel(3),
-        totalElapsed / maxDuration
-      );
+      this.progressRenderer.render(totalElapsed / maxDuration);
     }
   }
 }

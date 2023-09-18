@@ -1,17 +1,19 @@
-export default function renderProgressWidget(
-  ctx: CanvasRenderingContext2D,
-  x: number,
-  y: number,
-  width: number,
-  height: number,
-  ratio: number
-): void {
-  // Extract properties
+import { BoundedContext } from "./util";
 
-  // Calculate progress width based on the ratio
-  const progressWidth = ratio * width;
+export default class ProgressRenderer {
+  constructor(public ctx: BoundedContext) {}
 
-  // Draw the progress line
-  ctx.fillStyle = "#AAAAAA";
-  ctx.fillRect(x, y, progressWidth, height);
+  public render(ratio: number): void {
+    // Calculate progress width based on the ratio
+    const progressWidth = ratio * this.ctx.rect.width;
+
+    // Draw the progress line
+    this.ctx.ctx.fillStyle = "#AAAAAA";
+    this.ctx.ctx.fillRect(
+      this.ctx.rect.left,
+      this.ctx.rect.top,
+      progressWidth,
+      this.ctx.rect.height
+    );
+  }
 }

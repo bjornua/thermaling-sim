@@ -1,6 +1,6 @@
 import { Glider } from "../models/Glider";
 import { Thermal } from "../models/Thermal";
-import { BoundedRenderingContext } from "./util";
+import { BoundedContext, Rectangle } from "./util";
 
 export default class Renderer {
   private scaleX: number;
@@ -13,22 +13,16 @@ export default class Renderer {
   private thermalCanvas: HTMLCanvasElement;
   private thermalCtx: CanvasRenderingContext2D;
 
-  constructor(
-    public ctx: BoundedRenderingContext,
-    public worldX: number,
-    public worldY: number,
-    public worldWidth: number,
-    public worldHeight: number
-  ) {
-    this.scaleX = this.ctx.width / this.worldWidth;
-    this.scaleY = this.ctx.height / this.worldHeight;
+  constructor(public ctx: BoundedContext, public worldRect: Rectangle) {
+    this.scaleX = this.ctx.rect.width / this.worldRect.width;
+    this.scaleY = this.ctx.rect.height / this.worldRect.height;
     this.scaleFactor = Math.min(this.scaleX, this.scaleY);
-    this.gapX = this.ctx.width - this.worldWidth * this.scaleFactor;
-    this.gapY = this.ctx.height - this.worldHeight * this.scaleFactor;
+    this.gapX = this.ctx.rect.width - this.worldRect.width * this.scaleFactor;
+    this.gapY = this.ctx.rect.height - this.worldRect.height * this.scaleFactor;
 
     this.thermalCanvas = document.createElement("canvas");
-    this.thermalCanvas.width = this.ctx.width;
-    this.thermalCanvas.height = this.ctx.height;
+    this.thermalCanvas.width = this.ctx.rect.width;
+    this.thermalCanvas.height = this.ctx.rect.height;
     const thermalCtx = this.thermalCanvas.getContext("2d");
     if (thermalCtx === null) {
       throw new Error("Context doesn't exist");
@@ -37,11 +31,11 @@ export default class Renderer {
   }
 
   private toCanvasX(wx: number): number {
-    return this.worldToCanvas(wx, this.worldX);
+    return this.worldToCanvas(wx, this.worldRect.left);
   }
 
   private toCanvasY(wy: number): number {
-    return this.worldToCanvas(wy, this.worldY);
+    return this.worldToCanvas(wy, this.worldRect.top);
   }
 
   public render(thermal: Thermal, glider: Glider): void {
@@ -52,8 +46,8 @@ export default class Renderer {
     // Copy the cached thermal drawing onto the main canvas
     this.ctx.ctx.drawImage(
       this.thermalCanvas,
-      this.ctx.x + this.gapX / 2,
-      this.ctx.y + this.gapY / 2
+      this.ctx.rect.left,
+      this.ctx.rect.top
     );
     this.drawGlider(glider);
   }
@@ -63,8 +57,10 @@ export default class Renderer {
   }
 
   private drawGlider(glider: Glider): void {
-    const pixelX = this.toCanvasX(glider.x) + this.ctx.x + this.gapX / 2;
-    const pixelY = this.toCanvasY(glider.y) + this.ctx.y + this.gapY / 2;
+    const pixelX = this.toCanvasX(glider.x) + this.ctx.rect.top + this.gapX / 2;
+    const pixelY =
+      this.toCanvasY(glider.y) + this.ctx.rect.left + this.gapY / 2;
+    console.log({ rectLeft: this.ctx.rect.left, pixelX, pixelY });
 
     // Draw the glider itself
     this.ctx.ctx.fillStyle = glider.color;
@@ -101,12 +97,14 @@ export default class Renderer {
       const point = glider.trace[i];
 
       const prevPixelX =
-        this.toCanvasX(prevPoint.x) + this.ctx.x + this.gapX / 2;
+        this.toCanvasX(prevPoint.x) + this.ctx.rect.left + this.gapX / 2;
       const prevPixelY =
-        this.toCanvasY(prevPoint.y) + this.ctx.y + this.gapY / 2;
+        this.toCanvasY(prevPoint.y) + this.ctx.rect.top + this.gapY / 2;
 
-      const pointPixelX = this.toCanvasX(point.x) + this.ctx.x + this.gapX / 2;
-      const pointPixelY = this.toCanvasY(point.y) + this.ctx.y + this.gapY / 2;
+      const pointPixelX =
+        this.toCanvasX(point.x) + this.ctx.rect.left + this.gapX / 2;
+      const pointPixelY =
+        this.toCanvasY(point.y) + this.ctx.rect.top + this.gapY / 2;
 
       const strokeWeight = this.getStrokeWeight(point.bankAngle);
 
@@ -140,7 +138,7 @@ export default class Renderer {
     const centerY = this.toCanvasY(thermal.y);
 
     // Clear the offscreen canvas before redrawing
-    this.thermalCtx.clearRect(0, 0, this.ctx.width, this.ctx.height);
+    this.thermalCtx.clearRect(0, 0, this.ctx.rect.width, this.ctx.rect.height);
 
     for (let i = 0; i <= 4; i++) {
       const lift = (i / 5) * thermal.maxLift;

@@ -1,4 +1,4 @@
-import { BoundedRenderingContext } from "./util";
+import { BoundedContext, OffscreenBoundedContext } from "./util";
 
 // Constants
 const SKY_COLOR = "#54899e";
@@ -8,8 +8,8 @@ const BLACK = "black";
 const YELLOW = "#FFFF00";
 
 class AttitudeIndicator {
-  private offscreenCanvas: HTMLCanvasElement;
-  private offscreenCtx: CanvasRenderingContext2D;
+  private offscreenCtx: OffscreenBoundedContext;
+
   private staticContents: HTMLCanvasElement;
   private circularMask: HTMLCanvasElement;
   private diameter: number;
@@ -17,28 +17,17 @@ class AttitudeIndicator {
   private centerX: number;
   private centerY: number;
 
-  constructor(public ctx: BoundedRenderingContext) {
-    this.diameter = Math.min(this.ctx.width, this.ctx.height);
+  constructor(public ctx: BoundedContext) {
+    this.diameter = Math.min(this.ctx.rect.width, this.ctx.rect.height);
     this.radius = Math.floor(this.diameter / 2);
     this.centerX = Math.floor(
-      (this.ctx.width - this.diameter) / 2 + this.radius
+      (this.ctx.rect.width - this.diameter) / 2 + this.radius
     );
     this.centerY = Math.floor(
-      (this.ctx.height - this.diameter) / 2 + this.radius
+      (this.ctx.rect.height - this.diameter) / 2 + this.radius
     );
 
-    // Initialize the offscreen canvas with a circular clip
-    this.offscreenCanvas = document.createElement("canvas");
-    this.offscreenCanvas.width = this.ctx.width;
-    this.offscreenCanvas.height = this.ctx.height;
-
-    const offscreenCtx = this.offscreenCanvas.getContext("2d", {
-      alpha: false,
-    });
-    if (!offscreenCtx) {
-      throw new Error("Context doesn't exist");
-    }
-    this.offscreenCtx = offscreenCtx;
+    this.offscreenCtx = ctx.createOffScreenCanvas();
 
     // Initialize static contents
     this.staticContents = this.drawStaticContents();
@@ -47,15 +36,15 @@ class AttitudeIndicator {
 
   generateCircularMask(): HTMLCanvasElement {
     const maskCanvas = document.createElement("canvas");
-    maskCanvas.width = this.ctx.width;
-    maskCanvas.height = this.ctx.height;
+    maskCanvas.width = this.ctx.rect.width;
+    maskCanvas.height = this.ctx.rect.height;
 
     const maskCtx = maskCanvas.getContext("2d");
     if (!maskCtx) throw new Error("Context doesn't exist");
 
     // Fill the entire canvas with white
     maskCtx.fillStyle = "#FFFFFF";
-    maskCtx.fillRect(0, 0, this.ctx.width, this.ctx.height);
+    maskCtx.fillRect(0, 0, this.ctx.rect.width, this.ctx.rect.height);
 
     // Clear the circular area, making it transparent
     maskCtx.globalCompositeOperation = "destination-out";
@@ -71,26 +60,20 @@ class AttitudeIndicator {
 
   public render(bankAngle: number) {
     this.drawDynamicContents(bankAngle);
-    this.ctx.ctx.drawImage(
-      this.offscreenCanvas,
-      this.ctx.x,
-      this.ctx.y,
-      this.ctx.width,
-      this.ctx.height
-    );
+    this.offscreenCtx.drawToParent();
     this.ctx.ctx.drawImage(
       this.staticContents,
-      this.ctx.x,
-      this.ctx.y,
-      this.ctx.width,
-      this.ctx.height
+      this.ctx.rect.left,
+      this.ctx.rect.top,
+      this.ctx.rect.width,
+      this.ctx.rect.height
     );
     this.ctx.ctx.drawImage(
       this.circularMask,
-      this.ctx.x,
-      this.ctx.y,
-      this.ctx.width,
-      this.ctx.height
+      this.ctx.rect.left,
+      this.ctx.rect.top,
+      this.ctx.rect.width,
+      this.ctx.rect.height
     );
   }
 
@@ -109,8 +92,8 @@ class AttitudeIndicator {
 
   private drawStaticContents(): HTMLCanvasElement {
     const offscreenCanvas = document.createElement("canvas");
-    offscreenCanvas.width = this.ctx.width;
-    offscreenCanvas.height = this.ctx.height;
+    offscreenCanvas.width = this.ctx.rect.width;
+    offscreenCanvas.height = this.ctx.rect.height;
 
     const offscreenCtx = offscreenCanvas.getContext("2d", { alpha: true });
     if (!offscreenCtx) {
@@ -131,32 +114,37 @@ class AttitudeIndicator {
   }
 
   private drawDynamicContents(bankAngle: number) {
-    this.offscreenCtx.save();
-    this.offscreenCtx.translate(this.centerX, this.centerY);
-    this.offscreenCtx.rotate(-bankAngle * (Math.PI / 180));
+    this.offscreenCtx.ctx.save();
+    this.offscreenCtx.ctx.translate(this.centerX, this.centerY);
+    this.offscreenCtx.ctx.rotate(-bankAngle * (Math.PI / 180));
 
     // Draw sky and ground
-    this.offscreenCtx.fillStyle = SKY_COLOR;
-    this.offscreenCtx.fillRect(
+    this.offscreenCtx.ctx.fillStyle = SKY_COLOR;
+    this.offscreenCtx.ctx.fillRect(
       -this.radius,
       -this.radius,
       2 * this.radius,
       this.radius
     );
-    this.offscreenCtx.fillStyle = GROUND_COLOR;
-    this.offscreenCtx.fillRect(-this.radius, 0, 2 * this.radius, this.radius);
+    this.offscreenCtx.ctx.fillStyle = GROUND_COLOR;
+    this.offscreenCtx.ctx.fillRect(
+      -this.radius,
+      0,
+      2 * this.radius,
+      this.radius
+    );
 
-    this.drawBankMarkers(this.offscreenCtx, this.radius);
+    this.drawBankMarkers(this.offscreenCtx.ctx, this.radius);
 
     // Draw horizon line
-    this.offscreenCtx.strokeStyle = HORIZON;
-    this.offscreenCtx.beginPath();
-    this.offscreenCtx.moveTo(-this.radius, 0);
-    this.offscreenCtx.lineTo(this.radius, 0);
-    this.offscreenCtx.lineWidth = this.ctx.scalePixel(2);
-    this.offscreenCtx.stroke();
+    this.offscreenCtx.ctx.strokeStyle = HORIZON;
+    this.offscreenCtx.ctx.beginPath();
+    this.offscreenCtx.ctx.moveTo(-this.radius, 0);
+    this.offscreenCtx.ctx.lineTo(this.radius, 0);
+    this.offscreenCtx.ctx.lineWidth = this.ctx.scalePixel(2);
+    this.offscreenCtx.ctx.stroke();
 
-    this.offscreenCtx.restore();
+    this.offscreenCtx.ctx.restore();
   }
 
   private drawBankMarkers(ctx: CanvasRenderingContext2D, radius: number) {
