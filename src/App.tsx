@@ -1,7 +1,11 @@
 import { Container, MantineProvider } from "@mantine/core";
 import { TypographyStylesProvider } from "@mantine/core";
-import { ThermalingSimulation } from "./components/ThermalingSimulation";
+import { SingleGliderSimulation } from "./components/SingleGliderSimulation";
+import { ThreeGlidersSimulation } from "./components/ThreeGlidersSimulation";
 import { AdaptiveBanking } from "./models/GliderController";
+import { World } from "./models/World";
+import { Thermal } from "./models/Thermal";
+import { Glider } from "./models/Glider";
 
 export default function App() {
   return (
@@ -44,7 +48,7 @@ export default function App() {
             At its most fundamental level, thermal soaring involves recognizing
             that you are in a thermal.
           </p>
-          <ThermalingSimulation
+          <SingleGliderSimulation
             controller={new AdaptiveBanking(0, 0, 0)}
             duration={25}
             x={0}
@@ -64,7 +68,7 @@ export default function App() {
             is to start banking at a fixed angle. That's it, you are now
             thermaling!
           </p>
-          <ThermalingSimulation
+          <SingleGliderSimulation
             controller={new AdaptiveBanking(45, 45, 45)}
             duration={60}
             x={150}
@@ -93,7 +97,7 @@ export default function App() {
           <p>
             Pay close attention to the timing of when the bank is increased.
           </p>
-          <ThermalingSimulation
+          <SingleGliderSimulation
             controller={new AdaptiveBanking(60, 45, 45)}
             duration={40}
             x={200}
@@ -112,7 +116,7 @@ export default function App() {
             indicates <strong>falling lift</strong>, as it suggests that the
             glider is nearing the edge of the thermal.
           </p>
-          <ThermalingSimulation
+          <SingleGliderSimulation
             controller={new AdaptiveBanking(45, 45, 60)}
             duration={80}
             x={0}
@@ -135,7 +139,7 @@ export default function App() {
             lift decreases, indicating a move away from the center, the pilot
             should tighten the turn.
           </p>
-          <ThermalingSimulation
+          <SingleGliderSimulation
             controller={new AdaptiveBanking(30, 45, 60)}
             duration={80}
             x={0}
@@ -164,38 +168,30 @@ export default function App() {
             The following simulations shows the widening and tightening
             technique, but introduces various amounts of lag.
           </p>
-          <h3 id="vario-lag-none">0ms variometer lag</h3>
-          <ThermalingSimulation
-            controller={new AdaptiveBanking(30, 45, 60)}
+          <h3 id="vario-lag-none">0ms, 500ms and 2000ms variometer lag</h3>
+          <ThreeGlidersSimulation
+            world={
+              new World(600, 600, new Thermal(300, 300, 5, 250), [
+                new Glider(0, 150, "#00F", 0, new AdaptiveBanking(30, 45, 60)),
+                new Glider(
+                  0,
+                  150,
+                  "#00F",
+                  0.5,
+                  new AdaptiveBanking(30, 45, 60)
+                ),
+                new Glider(0, 150, "#00F", 2, new AdaptiveBanking(30, 45, 60)),
+              ])
+            }
             duration={120}
-            x={0}
-            y={150}
-            variolag={0.5}
-            alwaysRenderOverheadView={true}
           />
-          <h3 id="vario-lag-500">500ms variometer lag</h3>
-          <ThermalingSimulation
-            controller={new AdaptiveBanking(30, 45, 60)}
-            duration={120}
-            x={0}
-            y={150}
-            variolag={0.5}
-            alwaysRenderOverheadView={true}
-          />
-          <h3 id="vario-lag-2000">2000ms variometer lag</h3>
-          <ThermalingSimulation
-            controller={new AdaptiveBanking(30, 45, 60)}
-            duration={120}
-            x={0}
-            y={150}
-            variolag={2}
-            alwaysRenderOverheadView={true}
-          />
+
           <p>
             As demonstrated, variometer lag has significant impact on the
             ability to easily and efficiently center in thermals using the
             variometer alone.
           </p>
+
           <h1>Using The Heading</h1>
           <p>
             While it would be ideal to eliminate variometer lag, this is not

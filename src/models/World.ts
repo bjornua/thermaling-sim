@@ -6,15 +6,17 @@ export class World {
     public width: number,
     public height: number,
     public thermal: Thermal,
-    public glider: Glider
+    public gliders: Glider[]
   ) {}
 
   reset() {
-    this.glider.reset();
+    this.gliders.map((glider) => glider.reset());
   }
 
   update(elapsedTime: number) {
-    const lift = this.thermal.calculateLift(this.glider.x, this.glider.y);
-    this.glider.update(lift, elapsedTime);
+    this.gliders.map((glider) => {
+      const lift = this.thermal.calculateLift(glider.x, glider.y);
+      glider.update(lift, elapsedTime);
+    });
   }
 }

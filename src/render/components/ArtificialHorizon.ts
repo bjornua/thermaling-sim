@@ -1,4 +1,4 @@
-import { BoundedContext, OffscreenBoundedContext } from "./util";
+import { BoundedContext, OffscreenBoundedContext } from "../util";
 
 // Constants
 const SKY_COLOR = "#54899e";

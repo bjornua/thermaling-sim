@@ -104,6 +104,61 @@ export class Rectangle {
 
     return new Rectangle(newLeft, newTop, newRight, newBottom);
   }
+  // Split the rectangle into columns
+  public splitVertically(columns: number): Rectangle[] {
+    const verticalRects: Rectangle[] = [];
+
+    const baseColumnWidth = Math.floor(this.width / columns);
+    const remainderWidth = this.width % columns;
+
+    let previousRight = this.left;
+
+    for (let col = 0; col < columns; col++) {
+      const columnWidth = baseColumnWidth + (col < remainderWidth ? 1 : 0);
+      const columnLeft = previousRight;
+
+      // Utilize getSubRectangle
+      const columnRect = this.getSubRectangle({
+        top: 0,
+        bottom: 0,
+        left: columnLeft,
+        width: columnWidth,
+      });
+      verticalRects.push(columnRect);
+
+      previousRight = columnRect.right;
+    }
+
+    return verticalRects;
+  }
+
+  // Split the rectangle into rows
+  public splitHorizontally(rows: number): Rectangle[] {
+    const horizontalRects: Rectangle[] = [];
+
+    const baseRowHeight = Math.floor(this.height / rows);
+    const remainderHeight = this.height % rows;
+
+    let previousBottom = this.top;
+
+    for (let row = 0; row < rows; row++) {
+      const rowHeight = baseRowHeight + (row < remainderHeight ? 1 : 0);
+      const rowTop = previousBottom;
+
+      // Utilize getSubRectangle
+      const rowRect = this.getSubRectangle({
+        top: rowTop,
+        height: rowHeight,
+        left: 0,
+        right: 0,
+      });
+      horizontalRects.push(rowRect);
+
+      previousBottom = rowRect.bottom;
+    }
+
+    return horizontalRects;
+  }
 }
 
 export class BoundedContext {
@@ -153,6 +208,18 @@ export class BoundedContext {
 
   scalePixel(value: number): number {
     return value * this.pixelRatio;
+  }
+
+  splitVertically(columns: number): BoundedContext[] {
+    return this.rect.splitVertically(columns).map((column) => {
+      return new BoundedContext(this.canvas, this.ctx, this.pixelRatio, column);
+    });
+  }
+
+  splitHorizontally(rows: number): BoundedContext[] {
+    return this.rect.splitHorizontally(rows).map((row) => {
+      return new BoundedContext(this.canvas, this.ctx, this.pixelRatio, row);
+    });
   }
 }
 

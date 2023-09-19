@@ -1,4 +1,4 @@
-import { BoundedContext } from "./util";
+import { BoundedContext } from "../util";
 
 export default class Renderer {
   private staticContent: HTMLCanvasElement;

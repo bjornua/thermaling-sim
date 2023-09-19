@@ -1,6 +1,6 @@
-import { Glider } from "../models/Glider";
-import { Thermal } from "../models/Thermal";
-import { BoundedContext, Rectangle } from "./util";
+import { Glider } from "../../models/Glider";
+import { Thermal } from "../../models/Thermal";
+import { BoundedContext, Rectangle } from "../util";
 
 export default class Renderer {
   private scaleX: number;
@@ -46,8 +46,8 @@ export default class Renderer {
     // Copy the cached thermal drawing onto the main canvas
     this.ctx.ctx.drawImage(
       this.thermalCanvas,
-      this.ctx.rect.left,
-      this.ctx.rect.top
+      this.ctx.rect.left + this.gapX / 2,
+      this.ctx.rect.top + this.gapY / 2
     );
     this.drawGlider(glider);
   }
@@ -57,10 +57,9 @@ export default class Renderer {
   }
 
   private drawGlider(glider: Glider): void {
-    const pixelX = this.toCanvasX(glider.x) + this.ctx.rect.top + this.gapX / 2;
-    const pixelY =
-      this.toCanvasY(glider.y) + this.ctx.rect.left + this.gapY / 2;
-    console.log({ rectLeft: this.ctx.rect.left, pixelX, pixelY });
+    const pixelX =
+      this.toCanvasX(glider.x) + this.ctx.rect.left + this.gapX / 2;
+    const pixelY = this.toCanvasY(glider.y) + this.ctx.rect.top + this.gapY / 2;
 
     // Draw the glider itself
     this.ctx.ctx.fillStyle = glider.color;
