@@ -52,7 +52,7 @@ export class Glider {
     this.height += elapsedTime * lift;
     // Update the variometer with current lift value and timestamp
     this.variometer.addLiftValue(lift, elapsedTime);
-    this.targetBankAngle = this.controller.update(this.variometer);
+    this.targetBankAngle = this.controller.update(this, elapsedTime);
     this.updateBankAngle(elapsedTime);
     this.updatePosition(elapsedTime);
 
@@ -75,11 +75,25 @@ export class Glider {
     }
   }
 
-  private updatePosition(elapsedTime: number): void {
+  getTurnRate(bankAngle: number): number {
+    // Calculate turn rate in radians per second
     const speedMetersPerSecond = (this.speed * 1000) / 3600;
     const angularSpeed =
-      (this.G / speedMetersPerSecond) *
-      Math.tan((this.bankAngle * Math.PI) / 180); // Convert bank angle to radians
+      (this.G / speedMetersPerSecond) * Math.tan((bankAngle * Math.PI) / 180);
+
+    // Convert turn rate to degrees per second
+    const turnRateDegreesPerSecond = angularSpeed * (180 / Math.PI);
+
+    return turnRateDegreesPerSecond;
+  }
+
+  private updatePosition(elapsedTime: number): void {
+    const speedMetersPerSecond = (this.speed * 1000) / 3600;
+    const turnRateDegreesPerSecond = this.getTurnRate(this.bankAngle);
+
+    // Convert the turn rate back to radians per second for angularSpeed
+    const angularSpeed = turnRateDegreesPerSecond * (Math.PI / 180);
+
     const angularDistance = angularSpeed * elapsedTime;
 
     this.headingAngle += angularDistance;

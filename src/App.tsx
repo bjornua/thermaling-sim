@@ -2,7 +2,10 @@ import { Container, MantineProvider } from "@mantine/core";
 import { TypographyStylesProvider } from "@mantine/core";
 import { SingleGliderSimulation } from "./components/SingleGliderSimulation";
 import { ThreeGlidersSimulation } from "./components/ThreeGlidersSimulation";
-import { AdaptiveBanking } from "./models/GliderController";
+import {
+  AdaptiveBanking,
+  LagCompensatingController,
+} from "./models/GliderController";
 import { World } from "./models/World";
 import { Thermal } from "./models/Thermal";
 import { Glider } from "./models/Glider";
@@ -166,9 +169,9 @@ export default function App() {
           </p>
           <p>
             The following simulations shows the widening and tightening
-            technique, but introduces various amounts of lag.
+            technique, but introduces various amounts of lag from left to right.
+            The lag for each glider is: 0ms, 500ms and 2000ms.
           </p>
-          <h3 id="vario-lag-none">0ms, 500ms and 2000ms variometer lag</h3>
           <ThreeGlidersSimulation
             world={
               new World(600, 600, new Thermal(300, 300, 5, 250), [
@@ -185,14 +188,13 @@ export default function App() {
             }
             duration={120}
           />
-
           <p>
             As demonstrated, variometer lag has significant impact on the
             ability to easily and efficiently center in thermals using the
             variometer alone.
           </p>
 
-          <h1>Using The Heading</h1>
+          <h1>Dealing with lag</h1>
           <p>
             While it would be ideal to eliminate variometer lag, this is not
             always possible. With a variometer lag of 2 seconds, our current
@@ -207,7 +209,16 @@ export default function App() {
             indicating.
           </p>
           <h3>On rising lift, hold bank for 315° and widen turn for 180°</h3>
-          <p>[simulation missing...]</p>
+          <p>
+            <SingleGliderSimulation
+              controller={new LagCompensatingController(45, 35)}
+              duration={180}
+              x={0}
+              y={150}
+              variolag={2}
+              alwaysRenderOverheadView={false}
+            />
+          </p>
           <h2 id="caveats">Caveats and Considerations</h2>
           <p>
             The simulation is designed to provide a basic introduction to the

@@ -1,48 +1,116 @@
-import Variometer from "./Variometer";
+import { Glider } from "./Glider";
 
 export interface GliderController {
   reset(): void;
-  update(variometer: Variometer): number;
+  update(glider: Glider, elapsedTime: number): number;
 }
 
-type AdaptiveBankingState = "increase" | "neutral" | "decrease";
-export class AdaptiveBanking implements GliderController {
-  public activeState: AdaptiveBankingState = "neutral";
+type VariometerTrend = "increasing" | "neutral" | "decreasing";
 
+function getLiftTrend(glider: Glider): VariometerTrend {
+  const liftChangeOverTime = glider.variometer.getLiftChangeOverTime(0.5);
+
+  if (liftChangeOverTime > 0.05) {
+    return "increasing";
+  }
+  if (liftChangeOverTime < -0.05) {
+    return "decreasing";
+  }
+
+  return "neutral";
+}
+
+export class AdaptiveBanking implements GliderController {
   constructor(
     public bankWhenGainingLift: number,
     public bankWhenNeutral: number,
     public bankWhenLoosingLift: number
   ) {}
 
-  reset() {
-    this.activeState = "neutral";
-  }
+  reset() {}
 
-  private updateState(variometer: Variometer): void {
-    const liftChangeOverTime = variometer.getLiftChangeOverTime(1);
-
-    if (liftChangeOverTime > 0.05) {
-      this.activeState = "increase";
-    } else if (liftChangeOverTime < -0.05) {
-      this.activeState = "decrease";
-    } else {
-      this.activeState = "neutral";
-    }
-  }
-
-  update(variometer: Variometer): number {
-    this.updateState(variometer);
-
-    switch (this.activeState) {
-      case "increase":
+  update(glider: Glider): number {
+    switch (getLiftTrend(glider)) {
+      case "increasing":
         return this.bankWhenGainingLift;
-      case "decrease":
+      case "decreasing":
         return this.bankWhenLoosingLift;
       case "neutral":
         return this.bankWhenNeutral;
-      default:
-        throw new Error(`Invalid state: ${this.activeState}`);
+    }
+  }
+}
+
+type ControllerState =
+  | { kind: "WaitingForPeak"; lastTrend: VariometerTrend }
+  | { kind: "Delaying"; degrees: number; elapsed: number }
+  | { kind: "Banking"; degrees: number; elapsed: number };
+
+export class LagCompensatingController implements GliderController {
+  private state: ControllerState;
+  private delayDuration = 2.8;
+  private bankDuration = 13.9;
+
+  constructor(
+    public neutralBankAngle: number,
+    public fallingBankAngle: number
+  ) {
+    this.state = { kind: "WaitingForPeak", lastTrend: "neutral" };
+  }
+
+  reset() {
+    this.state = { kind: "WaitingForPeak", lastTrend: "neutral" };
+  }
+
+  private updateState(glider: Glider, elapsedTime: number): void {
+    const currentTrend = getLiftTrend(glider);
+
+    switch (this.state.kind) {
+      case "WaitingForPeak":
+        if (this.state.lastTrend === "neutral") {
+          this.state.lastTrend = currentTrend;
+        }
+        if (
+          currentTrend !== "neutral" &&
+          currentTrend !== this.state.lastTrend
+        ) {
+          this.state = {
+            kind: "Delaying",
+            degrees: this.fallingBankAngle,
+            elapsed: 0,
+          };
+        }
+        break;
+      case "Delaying":
+        if (this.state.elapsed >= this.delayDuration) {
+          this.state = {
+            kind: "Banking",
+            degrees: this.state.degrees,
+            elapsed: 0,
+          };
+        } else {
+          this.state.elapsed += elapsedTime;
+        }
+        break;
+      case "Banking":
+        if (this.state.elapsed >= this.bankDuration) {
+          this.state = { kind: "WaitingForPeak", lastTrend: currentTrend };
+        } else {
+          this.state.elapsed += elapsedTime;
+        }
+        break;
+    }
+  }
+
+  update(glider: Glider, elapsedTime: number): number {
+    this.updateState(glider, elapsedTime);
+
+    switch (this.state.kind) {
+      case "WaitingForPeak":
+      case "Delaying":
+        return this.neutralBankAngle;
+      case "Banking":
+        return this.state.degrees;
     }
   }
 }
