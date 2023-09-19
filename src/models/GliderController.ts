@@ -48,13 +48,12 @@ type ControllerState =
 
 export class LagCompensatingController implements GliderController {
   private state: ControllerState;
-  private delayDuration = 2.8;
-  private bankDuration = 13.9;
+  private delayDuration = 5;
+  private bankDuration = 13.8;
+  public neutralBankAngle = 45;
+  public fallingBankAngle = 30;
 
-  constructor(
-    public neutralBankAngle: number,
-    public fallingBankAngle: number
-  ) {
+  constructor() {
     this.state = { kind: "WaitingForPeak", lastTrend: "neutral" };
   }
 

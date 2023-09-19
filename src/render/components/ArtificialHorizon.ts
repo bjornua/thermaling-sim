@@ -14,20 +14,21 @@ class AttitudeIndicator {
   private circularMask: HTMLCanvasElement;
   private diameter: number;
   private radius: number;
-  private centerX: number;
-  private centerY: number;
+  public ctx: BoundedContext;
 
-  constructor(public ctx: BoundedContext) {
+  constructor(fullCtx: BoundedContext) {
+    this.diameter = Math.min(fullCtx.rect.width, fullCtx.rect.height);
+    this.ctx = fullCtx.getSubContext({
+      top: (fullCtx.rect.height - this.diameter) / 2,
+      left: (fullCtx.rect.width - this.diameter) / 2,
+      width: this.diameter,
+      height: this.diameter,
+    });
+
     this.diameter = Math.min(this.ctx.rect.width, this.ctx.rect.height);
     this.radius = Math.floor(this.diameter / 2);
-    this.centerX = Math.floor(
-      (this.ctx.rect.width - this.diameter) / 2 + this.radius
-    );
-    this.centerY = Math.floor(
-      (this.ctx.rect.height - this.diameter) / 2 + this.radius
-    );
 
-    this.offscreenCtx = ctx.createOffScreenCanvas();
+    this.offscreenCtx = this.ctx.createOffScreenCanvas();
 
     // Initialize static contents
     this.staticContents = this.drawStaticContents();
@@ -49,7 +50,7 @@ class AttitudeIndicator {
     // Clear the circular area, making it transparent
     maskCtx.globalCompositeOperation = "destination-out";
     maskCtx.beginPath();
-    maskCtx.arc(this.centerX, this.centerY, this.radius, 0, 2 * Math.PI);
+    maskCtx.arc(this.radius, this.radius, this.radius, 0, 2 * Math.PI);
     maskCtx.fill();
 
     // Reset composite operation
@@ -77,15 +78,16 @@ class AttitudeIndicator {
     );
   }
 
-  private drawOuterCircle(
-    ctx: CanvasRenderingContext2D,
-    centerX: number,
-    centerY: number,
-    radius: number
-  ) {
+  private drawOuterCircle(ctx: CanvasRenderingContext2D) {
     ctx.beginPath();
     ctx.strokeStyle = BLACK;
-    ctx.arc(centerX, centerY, radius - this.ctx.scalePixel(1), 0, 2 * Math.PI);
+    ctx.arc(
+      this.radius,
+      this.radius,
+      this.radius - this.ctx.scalePixel(1),
+      0,
+      2 * Math.PI
+    );
     ctx.lineWidth = 2 * this.ctx.scalePixel(1);
     ctx.stroke();
   }
@@ -100,22 +102,17 @@ class AttitudeIndicator {
       throw new Error("Context doesn't exist");
     }
 
-    this.drawOuterCircle(offscreenCtx, this.centerX, this.centerY, this.radius);
+    this.drawOuterCircle(offscreenCtx);
 
-    this.drawTrianglePointer(offscreenCtx, this.centerX, this.radius * 0.1);
-    this.drawAircraftSymbol(
-      offscreenCtx,
-      this.centerX,
-      this.centerY,
-      this.radius * 0.3
-    );
+    this.drawTrianglePointer(offscreenCtx);
+    this.drawAircraftSymbol(offscreenCtx, this.radius * 0.3);
 
     return offscreenCanvas;
   }
 
   private drawDynamicContents(bankAngle: number) {
     this.offscreenCtx.ctx.save();
-    this.offscreenCtx.ctx.translate(this.centerX, this.centerY);
+    this.offscreenCtx.ctx.translate(this.radius, this.radius);
     this.offscreenCtx.ctx.rotate(-bankAngle * (Math.PI / 180));
 
     // Draw sky and ground
@@ -134,7 +131,7 @@ class AttitudeIndicator {
       this.radius
     );
 
-    this.drawBankMarkers(this.offscreenCtx.ctx, this.radius);
+    this.drawBankMarkers(this.offscreenCtx.ctx);
 
     // Draw horizon line
     this.offscreenCtx.ctx.strokeStyle = HORIZON;
@@ -147,13 +144,13 @@ class AttitudeIndicator {
     this.offscreenCtx.ctx.restore();
   }
 
-  private drawBankMarkers(ctx: CanvasRenderingContext2D, radius: number) {
+  private drawBankMarkers(ctx: CanvasRenderingContext2D) {
     const drawMarker = (angle: number, length: number, lineWidth: number) => {
       const angleInRadians = (Math.PI / 180) * (angle - 90);
-      const x1 = radius * Math.cos(angleInRadians);
-      const y1 = radius * Math.sin(angleInRadians);
-      const x2 = (radius - length) * Math.cos(angleInRadians);
-      const y2 = (radius - length) * Math.sin(angleInRadians);
+      const x1 = this.radius * Math.cos(angleInRadians);
+      const y1 = this.radius * Math.sin(angleInRadians);
+      const x2 = (this.radius - length) * Math.cos(angleInRadians);
+      const y2 = (this.radius - length) * Math.sin(angleInRadians);
 
       ctx.strokeStyle = HORIZON;
       ctx.beginPath();
@@ -163,34 +160,26 @@ class AttitudeIndicator {
       ctx.stroke();
     };
 
-    drawMarker(0, radius * 0.1, this.ctx.scalePixel(1));
+    drawMarker(0, this.radius * 0.1, this.ctx.scalePixel(1));
     for (const angle of [0, 10, 20, 30, 45, 60]) {
-      drawMarker(angle, radius * 0.1, this.ctx.scalePixel(1));
-      drawMarker(-angle, radius * 0.1, this.ctx.scalePixel(1));
+      drawMarker(angle, this.radius * 0.1, this.ctx.scalePixel(1));
+      drawMarker(-angle, this.radius * 0.1, this.ctx.scalePixel(1));
     }
   }
 
-  private drawTrianglePointer(
-    ctx: CanvasRenderingContext2D,
-    centerX: number,
-    triangleSize: number
-  ) {
+  private drawTrianglePointer(ctx: CanvasRenderingContext2D) {
+    const triangleSize = this.radius * 0.1;
     const halfSize = triangleSize / 2;
     ctx.strokeStyle = YELLOW;
     ctx.beginPath();
-    ctx.moveTo(centerX, centerX * 0.1); // top point
-    ctx.lineTo(centerX - halfSize, centerX * 0.1 + 2 * halfSize); // bottom left
-    ctx.lineTo(centerX + halfSize, centerX * 0.1 + 2 * halfSize); // bottom right
+    ctx.moveTo(this.radius, this.radius * 0.1); // top point
+    ctx.lineTo(this.radius - halfSize, this.radius * 0.1 + 2 * halfSize); // bottom left
+    ctx.lineTo(this.radius + halfSize, this.radius * 0.1 + 2 * halfSize); // bottom right
     ctx.closePath();
     ctx.stroke();
   }
 
-  private drawAircraftSymbol(
-    ctx: CanvasRenderingContext2D,
-    centerX: number,
-    centerY: number,
-    size: number
-  ) {
+  private drawAircraftSymbol(ctx: CanvasRenderingContext2D, size: number) {
     const halfWingLength = size * 0.75;
 
     ctx.strokeStyle = YELLOW; // You can adjust the color if necessary.
@@ -198,14 +187,14 @@ class AttitudeIndicator {
 
     // Draw aircraft body (vertical line)
     ctx.beginPath();
-    ctx.moveTo(centerX, centerY - size * 0.5);
-    ctx.lineTo(centerX, centerY);
+    ctx.moveTo(this.radius, this.radius - size * 0.5);
+    ctx.lineTo(this.radius, this.radius);
     ctx.stroke();
 
     // Draw aircraft wings (horizontal line)
     ctx.beginPath();
-    ctx.moveTo(centerX - halfWingLength, centerY);
-    ctx.lineTo(centerX + halfWingLength, centerY);
+    ctx.moveTo(this.radius - halfWingLength, this.radius);
+    ctx.lineTo(this.radius + halfWingLength, this.radius);
     ctx.stroke();
   }
 }

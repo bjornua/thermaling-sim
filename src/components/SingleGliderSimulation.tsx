@@ -51,7 +51,7 @@ export const SingleGliderSimulation = ({
     useState(false);
 
   const simulation = useMemo(() => {
-    return makeSimulation(x, y, controller, 5, duration, variolag);
+    return makeSimulation(x, y, controller, 2, duration, variolag);
   }, [controller, duration, variolag, x, y]);
 
   let renderer: SingleRenderer | null = null;

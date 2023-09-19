@@ -54,7 +54,7 @@ export default function App() {
           <SingleGliderSimulation
             controller={new AdaptiveBanking(0, 0, 0)}
             duration={25}
-            x={0}
+            x={100}
             y={150}
             variolag={0}
             alwaysRenderOverheadView={false}
@@ -115,14 +115,14 @@ export default function App() {
           </p>
           <h2 id="centering">Centering in a Thermal</h2>
           <p>
-            A better technique is to tighten the turn when the variometer
-            indicates <strong>falling lift</strong>, as it suggests that the
-            glider is nearing the edge of the thermal.
+            A better technique is to widen the turn when the variometer
+            indicates <strong>rising lift</strong>, as it suggests that the
+            glider is nearing going towards the core of the thermal.
           </p>
           <SingleGliderSimulation
-            controller={new AdaptiveBanking(45, 45, 60)}
+            controller={new AdaptiveBanking(30, 45, 45)}
             duration={80}
-            x={0}
+            x={100}
             y={150}
             variolag={0}
             alwaysRenderOverheadView={false}
@@ -145,7 +145,7 @@ export default function App() {
           <SingleGliderSimulation
             controller={new AdaptiveBanking(30, 45, 60)}
             duration={80}
-            x={0}
+            x={100}
             y={150}
             variolag={0}
             alwaysRenderOverheadView={false}
@@ -170,20 +170,32 @@ export default function App() {
           <p>
             The following simulations shows the widening and tightening
             technique, but introduces various amounts of lag from left to right.
-            The lag for each glider is: 0ms, 500ms and 2000ms.
+            The lag for each glider is: 0, 1 and 3 seconds respectively.
           </p>
           <ThreeGlidersSimulation
             world={
               new World(600, 600, new Thermal(300, 300, 5, 250), [
-                new Glider(0, 150, "#00F", 0, new AdaptiveBanking(30, 45, 60)),
                 new Glider(
-                  0,
+                  100,
                   150,
                   "#00F",
-                  0.5,
+                  0,
                   new AdaptiveBanking(30, 45, 60)
                 ),
-                new Glider(0, 150, "#00F", 2, new AdaptiveBanking(30, 45, 60)),
+                new Glider(
+                  100,
+                  150,
+                  "#00F",
+                  1,
+                  new AdaptiveBanking(30, 45, 60)
+                ),
+                new Glider(
+                  100,
+                  150,
+                  "#00F",
+                  3,
+                  new AdaptiveBanking(30, 45, 60)
+                ),
               ])
             }
             duration={120}
@@ -194,28 +206,57 @@ export default function App() {
             variometer alone.
           </p>
 
-          <h1>Dealing with lag</h1>
+          <h2>Dealing With Vario Lag</h2>
+
+          <h3>Your Toolbox: Two Bank Angles</h3>
+
           <p>
-            While it would be ideal to eliminate variometer lag, this is not
-            always possible. With a variometer lag of 2 seconds, our current
-            reading corresponds to the glider's lift from 2 seconds prior. By
-            understanding how this relates to our turning behavior, we can
-            predict our position. Specifically, if we maintain a constant bank
-            angle, we'll return to the same position after completing a 360°
-            turn. At a speed of 90 km/h and a bank angle of 45°, the glider will
-            have completed 315° of the turn by the time our variometer reflects
-            the lift from our current position. In other words, after traveling
-            315°, we will arrive at the spot that our variometer is currently
-            indicating.
+            To get started, let's understand the two bank angles you'll use:
+            <ul>
+              <li>
+                A standard bank angle of 45°, which results in a turn rate of
+                22.5°/s when flying at a speed of 90 km/h.
+              </li>
+              <li>
+                A gentler bank angle of 30°, which gives you a turn rate of
+                13.0°/s at the same speed.
+              </li>
+            </ul>
           </p>
-          <h3>On rising lift, hold bank for 315° and widen turn for 180°</h3>
+
+          <h3>The Challenge: Vario Lag</h3>
+
+          <p>
+            The variometer typically has a lag of around 3 seconds. This means
+            that when you notice the lift is going up or down, the actual change
+            occurred 3 seconds—or 67.5°—ago.
+          </p>
+
+          <h3>The Pitfall: Late Reaction to Rising Lift</h3>
+
+          <p>
+            If you wait until the variometer shows rising lift, you're already
+            67.5° late. This leaves you with just 45°, or approximately 2
+            seconds, to adjust position in the remaining half-circle. That's
+            hardly enough time to optimize your position.
+          </p>
+
+          <h3>The Strategy: Timing Your Turn on Falling Lift</h3>
+
+          <p>
+            Here's what you can do: When you notice the lift is falling,
+            continue your turn for the remaining 112.5°, which will take about 5
+            seconds. Then, switch to a gentler 30° bank angle for 13.8 seconds.
+            This will help you make the most of the thermal's lift and get you
+            centered effectively.
+          </p>
           <p>
             <SingleGliderSimulation
-              controller={new LagCompensatingController(45, 35)}
+              controller={new LagCompensatingController()}
               duration={180}
-              x={0}
+              x={100}
               y={150}
-              variolag={2}
+              variolag={3}
               alwaysRenderOverheadView={false}
             />
           </p>

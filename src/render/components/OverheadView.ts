@@ -13,7 +13,10 @@ export default class Renderer {
   private thermalCanvas: HTMLCanvasElement;
   private thermalCtx: CanvasRenderingContext2D;
 
-  constructor(public ctx: BoundedContext, public worldRect: Rectangle) {
+  constructor(
+    public ctx: BoundedContext,
+    public worldRect: Rectangle
+  ) {
     this.scaleX = this.ctx.rect.width / this.worldRect.width;
     this.scaleY = this.ctx.rect.height / this.worldRect.height;
     this.scaleFactor = Math.min(this.scaleX, this.scaleY);
