@@ -256,7 +256,7 @@ export default function App() {
               duration={180}
               x={100}
               y={150}
-              variolag={3}
+              variolag={2}
               alwaysRenderOverheadView={false}
             />
           </p>

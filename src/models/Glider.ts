@@ -38,13 +38,13 @@ export class Glider {
     this.x = this.startX;
     this.y = this.startY;
     this.bankAngle = 0;
-    this.controller.reset();
     this.targetBankAngle = 0;
     this.height = 500;
     this.trace = [];
     this.totalElapsedTime = 0;
     this.headingAngle = 0;
     this.lastTraceUpdateTime = 0;
+    this.controller.reset();
     this.variometer.reset();
   }
 

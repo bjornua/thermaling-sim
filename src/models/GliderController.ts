@@ -41,6 +41,16 @@ export class AdaptiveBanking implements GliderController {
   }
 }
 
+const varioLag = 3;
+const turnRate30 = 13.0;
+const turnRate45 = 22.5;
+const bankDurationHdg = 45;
+const delayDurationHdg =
+  180 - varioLag * turnRate45 + (180 - bankDurationHdg) / 2;
+
+const bankDuration = bankDurationHdg / turnRate30;
+const delayDuration = delayDurationHdg / turnRate45;
+
 type ControllerState =
   | { kind: "WaitingForPeak"; lastTrend: VariometerTrend }
   | { kind: "Delaying"; degrees: number; elapsed: number }
@@ -48,8 +58,7 @@ type ControllerState =
 
 export class LagCompensatingController implements GliderController {
   private state: ControllerState;
-  private delayDuration = 5;
-  private bankDuration = 13.8;
+
   public neutralBankAngle = 45;
   public fallingBankAngle = 30;
 
@@ -61,48 +70,66 @@ export class LagCompensatingController implements GliderController {
     this.state = { kind: "WaitingForPeak", lastTrend: "neutral" };
   }
 
-  private updateState(glider: Glider, elapsedTime: number): void {
-    const currentTrend = getLiftTrend(glider);
+  private updateState(glider: Glider, elapsedTime: number): ControllerState {
+    const { state } = this;
+    switch (state.kind) {
+      case "WaitingForPeak": {
+        const currentTrend = getLiftTrend(glider);
+        if (currentTrend === "decreasing") {
+          // If the lift trend is decreasing, and it was previously increasing, then delay for a short period of time before banking.
+          if (state.lastTrend === "increasing") {
+            return {
+              kind: "Delaying",
+              degrees: this.fallingBankAngle,
+              elapsed: 0,
+            };
+          }
+          // If the lift trend is decreasing, and it was previously neutral, then wait for another peak before banking.
+          if (state.lastTrend === "neutral") {
+            return { kind: "WaitingForPeak", lastTrend: "decreasing" };
+          }
+        }
+        // If the lift trend is increasing, then wait for another peak before banking.
+        if (currentTrend === "increasing") {
+          return { kind: "WaitingForPeak", lastTrend: "increasing" };
+        }
 
-    switch (this.state.kind) {
-      case "WaitingForPeak":
-        if (this.state.lastTrend === "neutral") {
-          this.state.lastTrend = currentTrend;
-        }
-        if (
-          currentTrend !== "neutral" &&
-          currentTrend !== this.state.lastTrend
-        ) {
-          this.state = {
+        return state;
+      }
+
+      // If the state is currently delaying, then check whether enough time has passed to bank.
+      case "Delaying": {
+        if (state.elapsed >= delayDuration) {
+          return { kind: "Banking", degrees: state.degrees, elapsed: 0 };
+        } else {
+          // If not enough time has passed, then continue delaying.
+          return {
             kind: "Delaying",
-            degrees: this.fallingBankAngle,
-            elapsed: 0,
+            degrees: state.degrees,
+            elapsed: state.elapsed + elapsedTime,
           };
         }
-        break;
-      case "Delaying":
-        if (this.state.elapsed >= this.delayDuration) {
-          this.state = {
+      }
+
+      // If the state is currently banking, then check whether enough time has passed to unbank.
+      case "Banking": {
+        const currentTrend = getLiftTrend(glider);
+        if (state.elapsed >= bankDuration) {
+          return { kind: "WaitingForPeak", lastTrend: currentTrend };
+        } else {
+          // If not enough time has passed, then continue banking.
+          return {
             kind: "Banking",
-            degrees: this.state.degrees,
-            elapsed: 0,
+            degrees: state.degrees,
+            elapsed: state.elapsed + elapsedTime,
           };
-        } else {
-          this.state.elapsed += elapsedTime;
         }
-        break;
-      case "Banking":
-        if (this.state.elapsed >= this.bankDuration) {
-          this.state = { kind: "WaitingForPeak", lastTrend: currentTrend };
-        } else {
-          this.state.elapsed += elapsedTime;
-        }
-        break;
+      }
     }
   }
 
   update(glider: Glider, elapsedTime: number): number {
-    this.updateState(glider, elapsedTime);
+    this.state = this.updateState(glider, elapsedTime);
 
     switch (this.state.kind) {
       case "WaitingForPeak":
